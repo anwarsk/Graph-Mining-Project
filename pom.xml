@@ -8,5 +8,6 @@
   <modules>
   	<module>graphbuilder</module>
   	<module>dbmanager</module>
+  	<module>data</module>
   </modules>
 </project>
