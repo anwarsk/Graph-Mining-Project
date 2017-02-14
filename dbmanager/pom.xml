@@ -5,13 +5,6 @@
     <artifactId>graphminer</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>graphbuilder</artifactId>
-  <name>GraphBuilder</name>
-  <dependencies>
-  	<dependency>
-  		<groupId>com.iu.graphminer</groupId>
-  		<artifactId>dbmanager</artifactId>
-  		<version>0.0.1-SNAPSHOT</version>
-  	</dependency>
-  </dependencies>
+  <artifactId>dbmanager</artifactId>
+  <name>DatabaseManger</name>
 </project>
