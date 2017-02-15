@@ -5,10 +5,15 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import data.Author;
+import data.Paper;
+import data.PaperType;
 
 public class SQLAccessLayer {
 
@@ -76,8 +81,72 @@ public class SQLAccessLayer {
 				se.printStackTrace();
 			}//end finally try
 		}//end try
-		//System.out.println("Goodbye!");
 		return authorList;
+	}
+	
+	public List<Paper> getListOfPapers()
+	{
+		List<Paper> paperList = new ArrayList<Paper>();
+		
+		String query = "select  DISTINCT article_id, title, article_publication_date, type from paper;";
+		System.out.println("Executing query:" + query);
+		Connection conn = null;
+		Statement stmt = null;
+		try{
+			//STEP 2: Register JDBC driver
+			Class.forName("com.mysql.jdbc.Driver").newInstance();
+
+			//STEP 3: Open a connection
+			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+
+			//STEP 4: Execute a query
+			stmt = conn.createStatement();
+
+			String sql;
+			sql = query;
+			ResultSet rs = stmt.executeQuery(sql);
+			long paperCount = 1;
+			DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+			//STEP 5: Extract data from result set
+			while(rs.next()){
+				//Retrieve by column name
+				long articleId = rs.getLong("article_id");
+				String title = rs.getString("title");
+				Date publicationDate = dateFormat.parse(rs.getString("article_publication_date"));
+				String paperId = "p_" + paperCount;
+				PaperType paperType = PaperType.valueOf(rs.getString("type").toUpperCase());
+				Paper paper = new Paper(articleId, paperId, title);
+				paper.setPublicationDate(publicationDate);
+				paper.setPaperType(paperType);
+				paperList.add(paper);
+				
+				paperCount++;
+			}
+			//STEP 6: Clean-up environment
+			rs.close();
+			stmt.close();
+			conn.close();
+		}catch(SQLException se){
+			//Handle errors for JDBC
+			se.printStackTrace();
+		}catch(Exception e){
+			//Handle errors for Class.forName
+			e.printStackTrace();
+		}finally{
+			//finally block used to close resources
+			try{
+				if(stmt!=null)
+					stmt.close();
+			}catch(SQLException se2){
+			}// nothing we can do
+			try{
+				if(conn!=null)
+					conn.close();
+			}catch(SQLException se){
+				se.printStackTrace();
+			}//end finally try
+		}//end try
+		return paperList;
 	}
 	
 	public List<String> getListOfAuthorIDs(String authorFirstName, String authorLastName)
