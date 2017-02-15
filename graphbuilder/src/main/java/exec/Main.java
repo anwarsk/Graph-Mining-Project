@@ -14,9 +14,11 @@ public class Main {
 
 		createAuthorNodes();
 		System.out.println("Author Nodes Created.");
+		
 		createPaperNodes();
 		System.out.println("Paper Nodes Created.");
-		//createJournalNodes();
+		
+		createJournalNodes();
 		
 	}
 	
@@ -38,12 +40,10 @@ public class Main {
 		
 		SQLAccessLayer sqlAccessLayer = new SQLAccessLayer();
 		List<Paper> paperList = sqlAccessLayer.getListOfPapers();
-		
 		System.out.println("Paper Data Fetched.");
 		
 		Neo4jAccessLayer neo4jAccessLayer = new Neo4jAccessLayer();
 		neo4jAccessLayer.addPaperNodes(paperList);
-
 		System.out.println("Papers added to graph.");
 		
 		CSVAccessLayer csvAccessLayer = new CSVAccessLayer();
