@@ -32,4 +32,11 @@ public class Author {
 		this.authorID = authorID;
 	}
 
+	@Override
+	public String toString() {
+
+		String print = "";
+		print = print + this.getFirstName() + " " + this.getLastName();
+		return print;
+	}
 }
