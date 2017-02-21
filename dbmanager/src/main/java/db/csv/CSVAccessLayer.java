@@ -6,11 +6,12 @@ import java.io.PrintWriter;
 import java.util.List;
 
 import data.Author;
+import data.Keyword;
 import data.Paper;
 
 public class CSVAccessLayer {
 
-	private final String DB_PATH = "/media/anwar/825ED72B5ED716AF/Work/Database/CSV/";
+	private final String DB_PATH = "./../../../Database/CSV/";
 
 	public void writeAuthorsToCSV(List<Author> authorList)
 	{
@@ -51,6 +52,30 @@ public class CSVAccessLayer {
 			for (Paper paper : paperList)
 			{
 				String line = paper.getPaperId() + "," + paper.getArticleId();
+				fileWriter.println(line);
+			}
+			fileWriter.flush();
+			fileWriter.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public void writeKeywordsToCSV(List<Keyword> keywordList) {
+
+		assert keywordList.isEmpty() == false : "Empty Author List";
+
+		String fileName = "keyword.csv";
+		String filePath = DB_PATH + fileName;
+		PrintWriter fileWriter;
+		try {
+			fileWriter = new PrintWriter(new File(filePath));
+
+			fileWriter.write("keyword_id,keyword\n");
+			for (Keyword keyword : keywordList)
+			{
+				String line = keyword.getKeywordId() + "," + keyword.getKeyword();
 				fileWriter.println(line);
 			}
 			fileWriter.flush();

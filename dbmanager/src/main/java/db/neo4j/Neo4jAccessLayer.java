@@ -11,13 +11,30 @@ import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import data.Author;
+import data.Keyword;
 import data.Paper;
 
 public class Neo4jAccessLayer {
 
-	private final String DB_PATH = "/media/anwar/825ED72B5ED716AF/Work/Database/graph.acm2015";
+	private final String DB_PATH = "./../../../Database/graph.acm2015";
 	//private final String DB_PATH = "/home/anwar/acm_2015"; //Test
 
+	public void test()
+	{
+		File databaseDirectory = new File(DB_PATH);
+		GraphDatabaseBuilder dbBuilder = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(databaseDirectory);
+		GraphDatabaseService dbService =  dbBuilder.newGraphDatabase();
+
+		try (Transaction tx=dbService.beginTx()) 
+		{
+			System.out.println(dbService.findNodes(Label.label("author")).next().getProperty("first_name"));
+			tx.success();
+			tx.close();
+		}
+
+		dbService.shutdown();
+	}
+	
 	public void addAuthorNodes(List<Author> authorList)
 	{
 		assert authorList.isEmpty() == false : "Empty Author List";
@@ -80,6 +97,44 @@ public class Neo4jAccessLayer {
 				node.setProperty("publication_date", paper.getPublicationDate().getTime());
 				node.setProperty("title", paper.getTitle());
 				node.setProperty("type", paper.getPaperType().name().toLowerCase());
+			}
+			tx.success();
+			tx.close();
+		}
+
+		dbService.shutdown();
+	}
+
+	public void addKeywordNodes(List<Keyword> keywordList) {
+		// TODO Auto-generated method stub
+		
+		assert keywordList.isEmpty() == false : "Empty Paper List";
+
+		File databaseDirectory = new File(DB_PATH);
+		GraphDatabaseService dbService = new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
+
+		try (Transaction tx=dbService.beginTx()) 
+		{
+			for(Keyword keyword: keywordList.subList(0, keywordList.size()/2))
+			{
+
+				Node node = dbService.createNode();
+				node.addLabel(Label.label("keyword"));
+				node.setProperty("keyword_id", keyword.getKeywordId());
+				node.setProperty("keyword", keyword.getKeyword());
+			}
+			tx.success();
+			tx.close();
+		}
+
+		try (Transaction tx=dbService.beginTx()) 
+		{
+			for(Keyword keyword: keywordList.subList(keywordList.size()/2, keywordList.size()))
+			{
+				Node node = dbService.createNode();
+				node.addLabel(Label.label("keyword"));
+				node.setProperty("keyword", keyword.getKeyword());
+				node.setProperty("keyword_id", keyword.getKeywordId());
 			}
 			tx.success();
 			tx.close();

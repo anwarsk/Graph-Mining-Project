@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 import data.Author;
+import data.Keyword;
 import data.Paper;
 import data.PaperType;
 
@@ -28,7 +29,7 @@ public class SQLAccessLayer {
 	{
 		List<Author> authorList = new ArrayList<Author>();
 		
-		String query = "select distinct first_name, last_name from paper_author;";
+		String query = "select distinct first_name, last_name from paper_author limit 1000;";
 		System.out.println("Executing query:" + query);
 		Connection conn = null;
 		Statement stmt = null;
@@ -166,8 +167,6 @@ public class SQLAccessLayer {
 			//STEP 2: Register JDBC driver
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
 
-
-
 			//STEP 3: Open a connection
 			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
 
@@ -184,8 +183,6 @@ public class SQLAccessLayer {
 				int id  = rs.getInt("id");
 
 				authorIDs.add(String.valueOf(id));
-				//Display values
-				//System.out.println("ID: " + id);
 
 			}
 			//STEP 6: Clean-up environment
@@ -214,6 +211,67 @@ public class SQLAccessLayer {
 		}//end try
 		//System.out.println("Goodbye!");
 		return authorIDs;
+	}
+
+	public List<Keyword> getUniqueKeywordList() {
+		// TODO Auto-generated method stub
+		
+		String query = "select distinct keyword from paper_keyword;";
+		List<Keyword> keywordList = new ArrayList<Keyword>();
+
+		query = String.format(query);
+		System.out.println("Executing query:" + query);
+		Connection conn = null;
+		Statement stmt = null;
+		try{
+			//STEP 2: Register JDBC driver
+			Class.forName("com.mysql.jdbc.Driver").newInstance();
+
+			//STEP 3: Open a connection
+			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+
+			//STEP 4: Execute a query
+			stmt = conn.createStatement();
+
+			String sql;
+			sql = query;
+			ResultSet rs = stmt.executeQuery(sql);
+			int keywordCount = 1;
+			//STEP 5: Extract data from result set
+			while(rs.next()){
+				//Retrieve by column name
+				String keyword  = rs.getString("keyword").toLowerCase();
+				Keyword keywordObject = new Keyword(keywordCount, keyword);
+				keywordList.add(keywordObject);
+				keywordCount++;
+
+			}
+			//STEP 6: Clean-up environment
+			rs.close();
+			stmt.close();
+			conn.close();
+		}catch(SQLException se){
+			//Handle errors for JDBC
+			se.printStackTrace();
+		}catch(Exception e){
+			//Handle errors for Class.forName
+			e.printStackTrace();
+		}finally{
+			//finally block used to close resources
+			try{
+				if(stmt!=null)
+					stmt.close();
+			}catch(SQLException se2){
+			}// nothing we can do
+			try{
+				if(conn!=null)
+					conn.close();
+			}catch(SQLException se){
+				se.printStackTrace();
+			}//end finally try
+		}//end try
+		//System.out.println("Goodbye!");
+		return keywordList;
 	}
 	
 	
