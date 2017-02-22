@@ -24,10 +24,28 @@ public class Main {
 		
 		//createKeywordNodes();
 		
-		
+		connectAuthorPaper();
 	}
 	
 	
+	private static void connectAuthorPaper() {
+		// TODO Auto-generated method stub
+		SQLAccessLayer sqlAccessLayer = new SQLAccessLayer();
+		List<Author> authorList = sqlAccessLayer.getUniqueAuthorListFromLocal();
+		System.out.println(authorList);
+		for(Author author : authorList)
+		{
+			List<Paper> paperList = sqlAccessLayer.getListOfPapersForAuthor(author);
+			System.out.println("SQL-Query Done");
+			Neo4jAccessLayer neo4jAccessLayer = new Neo4jAccessLayer();
+			neo4jAccessLayer.createAuthorPaperConnections(author, paperList);
+			System.out.println("Neo4j Add Done");
+		}
+		
+		
+	}
+
+
 	private static void createKeywordNodes() {
 		// TODO Auto-generated method stub
 		SQLAccessLayer sqlAccessLayer = new SQLAccessLayer();
