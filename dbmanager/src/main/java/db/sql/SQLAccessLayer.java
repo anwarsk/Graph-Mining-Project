@@ -18,18 +18,25 @@ import data.PaperType;
 
 public class SQLAccessLayer {
 
-	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";  
-	static final String DB_URL = "jdbc:mysql://rdc04.uits.iu.edu:3264/ACM2015";
+	static  String JDBC_DRIVER = "com.mysql.jdbc.Driver";  
+	static  String DB_URL = "jdbc:mysql://rdc04.uits.iu.edu:3264/ACM2015";
 
 	//  Database credentials
-	static final String USERNAME = "summary_proj";
-	static final String PASSWORD = "xpa25Rd";
+	static  String USERNAME = "summary_proj";
+	static  String PASSWORD = "xpa25Rd";
 
-	public List<Author> getUniqueAuthorList()
+	public List<Author> getUniqueAuthorListFromLocal()
 	{
+		String JDBC_DRIVER = "com.mysql.jdbc.Driver";  
+		String DB_URL = "jdbc:mysql://127.0.0.1:3306/acm2015";
+
+		//  Database credentials
+		String USERNAME = "root";
+		String PASSWORD = "root";
+
 		List<Author> authorList = new ArrayList<Author>();
-		
-		String query = "select distinct first_name, last_name from paper_author limit 1000;";
+
+		String query = "select author_id, first_name, last_name from author limit 1000;";
 		System.out.println("Executing query:" + query);
 		Connection conn = null;
 		Statement stmt = null;
@@ -46,15 +53,13 @@ public class SQLAccessLayer {
 			String sql;
 			sql = query;
 			ResultSet rs = stmt.executeQuery(sql);
-			long authorCount = 1;
 			//STEP 5: Extract data from result set
 			while(rs.next()){
 				//Retrieve by column name
 				String firstName = rs.getString("first_name");
 				String lastName = rs.getString("last_name");
-				String authorID = "a_" + authorCount;
-				authorCount++;
-				
+				String authorID =  rs.getString("author_id");
+
 				authorList.add(new Author(authorID, firstName, lastName));
 
 			}
@@ -84,11 +89,78 @@ public class SQLAccessLayer {
 		}//end try
 		return authorList;
 	}
-	
+
+	public List<Author> getUniqueAuthorList()
+	{
+		String JDBC_DRIVER = "com.mysql.jdbc.Driver";  
+		String DB_URL = "jdbc:mysql://127.0.0.1:3306/acm2015";
+
+		//  Database credentials
+		String USERNAME = "root";
+		String PASSWORD = "root";
+
+		List<Author> authorList = new ArrayList<Author>();
+
+		String query = "select distinct first_name, last_name from paper_author limit ;";
+		System.out.println("Executing query:" + query);
+		Connection conn = null;
+		Statement stmt = null;
+		try{
+			//STEP 2: Register JDBC driver
+			Class.forName("com.mysql.jdbc.Driver").newInstance();
+
+			//STEP 3: Open a connection
+			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+
+			//STEP 4: Execute a query
+			stmt = conn.createStatement();
+
+			String sql;
+			sql = query;
+			ResultSet rs = stmt.executeQuery(sql);
+			long authorCount = 1;
+			//STEP 5: Extract data from result set
+			while(rs.next()){
+				//Retrieve by column name
+				String firstName = rs.getString("first_name");
+				String lastName = rs.getString("last_name");
+				String authorID = "a_" + authorCount;
+				authorCount++;
+
+				authorList.add(new Author(authorID, firstName, lastName));
+
+			}
+			//STEP 6: Clean-up environment
+			rs.close();
+			stmt.close();
+			conn.close();
+		}catch(SQLException se){
+			//Handle errors for JDBC
+			se.printStackTrace();
+		}catch(Exception e){
+			//Handle errors for Class.forName
+			e.printStackTrace();
+		}finally{
+			//finally block used to close resources
+			try{
+				if(stmt!=null)
+					stmt.close();
+			}catch(SQLException se2){
+			}// nothing we can do
+			try{
+				if(conn!=null)
+					conn.close();
+			}catch(SQLException se){
+				se.printStackTrace();
+			}//end finally try
+		}//end try
+		return authorList;
+	}
+
 	public List<Paper> getListOfPapers()
 	{
 		List<Paper> paperList = new ArrayList<Paper>();
-		
+
 		String query = "select  DISTINCT article_id, title, article_publication_date, type from paper;";
 		System.out.println("Executing query:" + query);
 		Connection conn = null;
@@ -120,7 +192,7 @@ public class SQLAccessLayer {
 				paper.setPublicationDate(publicationDate);
 				paper.setPaperType(paperType);
 				paperList.add(paper);
-				
+
 				paperCount++;
 			}
 			//STEP 6: Clean-up environment
@@ -149,10 +221,10 @@ public class SQLAccessLayer {
 		}//end try
 		return paperList;
 	}
-	
+
 	public List<String> getListOfAuthorIDs(String authorFirstName, String authorLastName)
 	{
-		
+
 		assert authorFirstName != null & !authorFirstName.isEmpty(): "Invalid Author First Name" + authorFirstName;
 		assert authorLastName != null & !authorLastName.isEmpty(): "Invalid Author Last Name" + authorFirstName;
 
@@ -215,7 +287,7 @@ public class SQLAccessLayer {
 
 	public List<Keyword> getUniqueKeywordList() {
 		// TODO Auto-generated method stub
-		
+
 		String query = "select distinct keyword from paper_keyword;";
 		List<Keyword> keywordList = new ArrayList<Keyword>();
 
@@ -273,7 +345,73 @@ public class SQLAccessLayer {
 		//System.out.println("Goodbye!");
 		return keywordList;
 	}
-	
-	
+
+	public List<Paper> getListOfPapersForAuthor(Author author) {
+		String JDBC_DRIVER = "com.mysql.jdbc.Driver";  
+		String DB_URL = "jdbc:mysql://127.0.0.1:3306/acm2015?verifyServerCertificate=false&useSSL=false";
+
+		//  Database credentials
+		String USERNAME = "root";
+		String PASSWORD = "root";
+//		
+		List<Paper> paperList = new ArrayList<Paper>();
+
+		String query = "select distinct article_id, first_name, last_name, seq_no from paper_author where first_name='%s' and last_name='%s';";
+		query = String.format(query, author.getFirstName(), author.getLastName());
+		System.out.println("Executing query:" + query);
+		Connection conn = null;
+		Statement stmt = null;
+		try{
+			//STEP 2: Register JDBC driver
+			Class.forName("com.mysql.jdbc.Driver").newInstance();
+
+			//STEP 3: Open a connection
+			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+			
+			//STEP 4: Execute a query
+			stmt = conn.createStatement();
+
+			String sql;
+			sql = query;
+			ResultSet rs = stmt.executeQuery(sql);
+
+			//STEP 5: Extract data from result set
+			while(rs.next()){
+				//Retrieve by column name
+				long articleId = rs.getLong("article_id");
+				int seq_no = rs.getInt("seq_no");
+				Paper paper = new Paper(articleId, "", "");
+				paper.setSeq_no(seq_no);
+				paperList.add(paper);
+
+			}
+			//STEP 6: Clean-up environment
+			rs.close();
+			stmt.close();
+			conn.close();
+		}catch(SQLException se){
+			//Handle errors for JDBC
+			se.printStackTrace();
+		}catch(Exception e){
+			//Handle errors for Class.forName
+			e.printStackTrace();
+		}finally{
+			//finally block used to close resources
+			try{
+				if(stmt!=null)
+					stmt.close();
+			}catch(SQLException se2){
+			}// nothing we can do
+			try{
+				if(conn!=null)
+					conn.close();
+			}catch(SQLException se){
+				se.printStackTrace();
+			}//end finally try
+		}//end try
+		return paperList;
+	}
+
+
 
 }
