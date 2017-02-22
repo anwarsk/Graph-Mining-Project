@@ -9,7 +9,16 @@ public class Paper {
 	private Date publicationDate;
 	private String title;
 	private PaperType paperType;
+	private int seq_no;
 	
+	public int getSeq_no() {
+		return seq_no;
+	}
+
+	public void setSeq_no(int seq_no) {
+		this.seq_no = seq_no;
+	}
+
 	public Paper(long articleId, String paperId, String title)
 	{
 		this.articleId = articleId;
