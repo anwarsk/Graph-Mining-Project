@@ -6,6 +6,8 @@ import java.util.List;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -16,7 +18,8 @@ import data.Paper;
 
 public class Neo4jAccessLayer {
 
-	private final String DB_PATH = "./../../../Database/graph.acm2015";
+	//private final String DB_PATH = "./../../../Database/graph.acm2015";
+	private final String DB_PATH = "./../../../Database/graph.test.acm2015";
 	//private final String DB_PATH = "/home/anwar/acm_2015"; //Test
 
 	public void test()
@@ -136,6 +139,34 @@ public class Neo4jAccessLayer {
 				node.setProperty("keyword", keyword.getKeyword());
 				node.setProperty("keyword_id", keyword.getKeywordId());
 			}
+			tx.success();
+			tx.close();
+		}
+
+		dbService.shutdown();
+	}
+
+	public void createAuthorPaperConnections(Author author, List<Paper> paperList) {
+		// TODO Auto-generated method stub
+
+		assert author != null : "Invalid Author";
+		
+		File databaseDirectory = new File(DB_PATH);
+		GraphDatabaseBuilder dbBuilder = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(databaseDirectory);
+		GraphDatabaseService dbService =  dbBuilder.newGraphDatabase();
+
+		try (Transaction tx=dbService.beginTx()) 
+		{
+				Node authorNode = dbService.findNode(Label.label("author"), "author_id", author.getAuthorID());
+				double weight = (1.0/paperList.size());
+				for(Paper paper: paperList)
+				{
+					Node paperNode = dbService.findNode(Label.label("paper"), "article_id", paper.getArticleId());
+					Relationship relationship = authorNode.createRelationshipTo(paperNode, RelationshipType.withName("written"));
+					relationship.setProperty("weight", weight);
+					relationship.setProperty("seq_no", paper.getSeq_no());
+				}
+
 			tx.success();
 			tx.close();
 		}
