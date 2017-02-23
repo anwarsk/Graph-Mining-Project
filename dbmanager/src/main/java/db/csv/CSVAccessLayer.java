@@ -26,7 +26,7 @@ public class CSVAccessLayer {
 			fileWriter.write("author_id,first_name,last_name\n");
 			for (Author author : authorList)
 			{
-				String line = author.getAuthorID() + "," + author.getFirstName() + "," + author.getLastName();
+				String line = author.getAuthorID() + ",\"" + author.getFirstName() + "\",\"" + author.getLastName()+"\"";
 				fileWriter.println(line);
 			}
 			fileWriter.flush();
@@ -75,7 +75,7 @@ public class CSVAccessLayer {
 			fileWriter.write("keyword_id,keyword\n");
 			for (Keyword keyword : keywordList)
 			{
-				String line = keyword.getKeywordId() + "," + keyword.getKeyword();
+				String line = keyword.getKeywordId() + ",\"" + keyword.getKeyword() + "\"";
 				fileWriter.println(line);
 			}
 			fileWriter.flush();
