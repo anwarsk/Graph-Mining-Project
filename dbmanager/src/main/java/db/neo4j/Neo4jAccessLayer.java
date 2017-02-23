@@ -18,8 +18,8 @@ import data.Paper;
 
 public class Neo4jAccessLayer {
 
-	//private final String DB_PATH = "./../../../Database/graph.acm2015";
-	private final String DB_PATH = "./../../../Database/graph.test.acm2015";
+	private final String DB_PATH = "./../../../Database/graph.acm2015";
+	//private final String DB_PATH = "./../../../Database/graph.test.acm2015";
 	//private final String DB_PATH = "/home/anwar/acm_2015"; //Test
 
 	public void test()
@@ -37,7 +37,7 @@ public class Neo4jAccessLayer {
 
 		dbService.shutdown();
 	}
-	
+
 	public void addAuthorNodes(List<Author> authorList)
 	{
 		assert authorList.isEmpty() == false : "Empty Author List";
@@ -82,7 +82,7 @@ public class Neo4jAccessLayer {
 				node.setProperty("paper_id", paper.getPaperId());
 				node.setProperty("publication_date", paper.getPublicationDate().getTime());
 				node.setProperty("title", paper.getTitle());
-				node.setProperty("type", paper.getPaperType().name().toLowerCase());
+				//node.setProperty("type", paper.getPaperType().name().toLowerCase());
 
 			}
 			tx.success();
@@ -99,7 +99,7 @@ public class Neo4jAccessLayer {
 				node.setProperty("paper_id", paper.getPaperId());
 				node.setProperty("publication_date", paper.getPublicationDate().getTime());
 				node.setProperty("title", paper.getTitle());
-				node.setProperty("type", paper.getPaperType().name().toLowerCase());
+				//node.setProperty("type", paper.getPaperType().name().toLowerCase());
 			}
 			tx.success();
 			tx.close();
@@ -110,7 +110,7 @@ public class Neo4jAccessLayer {
 
 	public void addKeywordNodes(List<Keyword> keywordList) {
 		// TODO Auto-generated method stub
-		
+
 		assert keywordList.isEmpty() == false : "Empty Paper List";
 
 		File databaseDirectory = new File(DB_PATH);
@@ -146,31 +146,88 @@ public class Neo4jAccessLayer {
 		dbService.shutdown();
 	}
 
-	public void createAuthorPaperConnections(Author author, List<Paper> paperList) {
+	public void createAuthorPaperConnection(List<Author> authorList) {
 		// TODO Auto-generated method stub
 
-		assert author != null : "Invalid Author";
-		
+		System.out.println("Function Started");
+
+		assert authorList != null : "Invalid Author List";
+		assert authorList.isEmpty() == false : "Empty Author List";
+
+		System.out.println("Checkout: Assert");
+
 		File databaseDirectory = new File(DB_PATH);
 		GraphDatabaseBuilder dbBuilder = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(databaseDirectory);
+
+		System.out.println("Checkout: GraphDatabaseBuilder");
+
 		GraphDatabaseService dbService =  dbBuilder.newGraphDatabase();
+
+		System.out.println("Checkout: GraphDatabaseService");
 
 		try (Transaction tx=dbService.beginTx()) 
 		{
+			System.out.println("Checkout: Transaction Begin");
+			for(Author author : authorList.subList(0, authorList.size()/2))
+			{
+				List<Paper> paperList = author.getPaperList();
 				Node authorNode = dbService.findNode(Label.label("author"), "author_id", author.getAuthorID());
+
+//				System.out.println("Checkout: AuthorNode Found");
+
 				double weight = (1.0/paperList.size());
 				for(Paper paper: paperList)
 				{
+//					System.out.println("Checkout: PaperLoop-1");
 					Node paperNode = dbService.findNode(Label.label("paper"), "article_id", paper.getArticleId());
+					if (paperNode == null){System.out.println("Can not find paper with aid" + paper.getArticleId());}
+//					System.out.println("Checkout: PaperFound");
 					Relationship relationship = authorNode.createRelationshipTo(paperNode, RelationshipType.withName("written"));
+//					System.out.println("Checkout: Relationship Created");
 					relationship.setProperty("weight", weight);
 					relationship.setProperty("seq_no", paper.getSeq_no());
-				}
+//					System.out.println("Checkout: Relationship Properties Set");
+				}	
+			}
 
 			tx.success();
+			System.out.println("Checkout: Transaction Success");
 			tx.close();
+			System.out.println("Checkout: Transaction Close");
+		}
+
+		try (Transaction tx=dbService.beginTx()) 
+		{
+			System.out.println("Checkout: Transaction Begin");
+			for(Author author : authorList.subList(authorList.size()/2, authorList.size()))
+			{
+				List<Paper> paperList = author.getPaperList();
+
+				Node authorNode = dbService.findNode(Label.label("author"), "author_id", author.getAuthorID());
+
+//				System.out.println("Checkout: AuthorNode Found");
+
+				double weight = (1.0/paperList.size());
+				for(Paper paper: paperList)
+				{
+//					System.out.println("Checkout: PaperLoop-1");
+					Node paperNode = dbService.findNode(Label.label("paper"), "article_id", paper.getArticleId());
+//					System.out.println("Checkout: PaperFound");
+					Relationship relationship = authorNode.createRelationshipTo(paperNode, RelationshipType.withName("written"));
+//					System.out.println("Checkout: Relationship Created");
+					relationship.setProperty("weight", weight);
+					relationship.setProperty("seq_no", paper.getSeq_no());
+//					System.out.println("Checkout: Relationship Properties Set");
+				}
+
+			}
+			tx.success();
+			System.out.println("Checkout: Transaction Success");
+			tx.close();
+			System.out.println("Checkout: Transaction Close");
 		}
 
 		dbService.shutdown();
+		System.out.println("Checkout: Database Shutdown");
 	}
 }
