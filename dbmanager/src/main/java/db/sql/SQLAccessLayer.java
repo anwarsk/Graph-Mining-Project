@@ -36,7 +36,7 @@ public class SQLAccessLayer {
 
 		List<Author> authorList = new ArrayList<Author>();
 
-		String query = "select author_id, first_name, last_name from author limit 1000;";
+		String query = "select author_id, first_name, last_name from author;";
 		System.out.println("Executing query:" + query);
 		Connection conn = null;
 		Statement stmt = null;
@@ -101,7 +101,7 @@ public class SQLAccessLayer {
 
 		List<Author> authorList = new ArrayList<Author>();
 
-		String query = "select distinct first_name, last_name from paper_author limit ;";
+		String query = "select distinct first_name, last_name from paper_author;";
 		System.out.println("Executing query:" + query);
 		Connection conn = null;
 		Statement stmt = null;
@@ -161,7 +161,7 @@ public class SQLAccessLayer {
 	{
 		List<Paper> paperList = new ArrayList<Paper>();
 
-		String query = "select  DISTINCT article_id, title, article_publication_date, type from paper;";
+		String query = "select DISTINCT article_id, title, article_publication_date from paper;";
 		System.out.println("Executing query:" + query);
 		Connection conn = null;
 		Statement stmt = null;
@@ -187,10 +187,10 @@ public class SQLAccessLayer {
 				String title = rs.getString("title");
 				Date publicationDate = dateFormat.parse(rs.getString("article_publication_date"));
 				String paperId = "p_" + paperCount;
-				PaperType paperType = PaperType.valueOf(rs.getString("type").toUpperCase());
+				//PaperType paperType = PaperType.valueOf(rs.getString("type").toUpperCase());
 				Paper paper = new Paper(articleId, paperId, title);
 				paper.setPublicationDate(publicationDate);
-				paper.setPaperType(paperType);
+				//paper.setPaperType(paperType);
 				paperList.add(paper);
 
 				paperCount++;
