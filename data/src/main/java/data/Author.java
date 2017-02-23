@@ -1,11 +1,22 @@
 package data;
 
+import java.util.List;
+
 public class Author {
 	
 	private String firstName;
 	private String lastName;
 	private String authorID;
+	private List<Paper> paperList;
 	
+	public List<Paper> getPaperList() {
+		return paperList;
+	}
+
+	public void setPaperList(List<Paper> paperList) {
+		this.paperList = paperList;
+	}
+
 	public Author(String authorID, String firstName, String lastName)
 	{
 		this.authorID = authorID;
