@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+
 import data.Author;
 import data.Keyword;
 import data.Paper;
@@ -59,7 +61,6 @@ public class SQLAccessLayer {
 				String firstName = rs.getString("first_name");
 				String lastName = rs.getString("last_name");
 				String authorID =  rs.getString("author_id");
-
 				authorList.add(new Author(authorID, firstName, lastName));
 
 			}
@@ -312,7 +313,7 @@ public class SQLAccessLayer {
 			//STEP 5: Extract data from result set
 			while(rs.next()){
 				//Retrieve by column name
-				String keyword  = rs.getString("keyword").toLowerCase();
+				String keyword  = rs.getString("keyword");
 				Keyword keywordObject = new Keyword(keywordCount, keyword);
 				keywordList.add(keywordObject);
 				keywordCount++;
@@ -348,25 +349,31 @@ public class SQLAccessLayer {
 
 	public List<Paper> getListOfPapersForAuthor(Author author) {
 		String JDBC_DRIVER = "com.mysql.jdbc.Driver";  
-		String DB_URL = "jdbc:mysql://127.0.0.1:3306/acm2015?verifyServerCertificate=false&useSSL=false";
+		String DB_URL = "jdbc:mysql://localhost:3306/acm2015?verifyServerCertificate=false&useSSL=true";
 
 		//  Database credentials
 		String USERNAME = "root";
 		String PASSWORD = "root";
 //		
+		MysqlDataSource dataSource = new MysqlDataSource();
+		dataSource.setUser("root");
+		dataSource.setPassword("root");
+		dataSource.setServerName("localhost");
+		
 		List<Paper> paperList = new ArrayList<Paper>();
 
-		String query = "select distinct article_id, first_name, last_name, seq_no from paper_author where first_name='%s' and last_name='%s';";
+		String query = "select article_id, first_name, last_name, seq_no from acm2015.paper_author where first_name='%s' and last_name='%s';";
 		query = String.format(query, author.getFirstName(), author.getLastName());
 		System.out.println("Executing query:" + query);
 		Connection conn = null;
 		Statement stmt = null;
 		try{
 			//STEP 2: Register JDBC driver
-			Class.forName("com.mysql.jdbc.Driver").newInstance();
+			//Class.forName("com.mysql.jdbc.Driver").newInstance();
 
 			//STEP 3: Open a connection
-			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+			conn = dataSource.getConnection();
+			
 			
 			//STEP 4: Execute a query
 			stmt = conn.createStatement();
