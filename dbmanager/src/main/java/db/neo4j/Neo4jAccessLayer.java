@@ -157,70 +157,43 @@ public class Neo4jAccessLayer {
 		System.out.println("Checkout: Assert");
 
 		File databaseDirectory = new File(DB_PATH);
-		GraphDatabaseBuilder dbBuilder = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(databaseDirectory);
+		GraphDatabaseService dbService = new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
 
 		System.out.println("Checkout: GraphDatabaseBuilder");
-
-		GraphDatabaseService dbService =  dbBuilder.newGraphDatabase();
 
 		System.out.println("Checkout: GraphDatabaseService");
 
 		try (Transaction tx=dbService.beginTx()) 
 		{
 			System.out.println("Checkout: Transaction Begin");
-			for(Author author : authorList.subList(0, authorList.size()/2))
+			for(Author author : authorList)
 			{
 				List<Paper> paperList = author.getPaperList();
 				Node authorNode = dbService.findNode(Label.label("author"), "author_id", author.getAuthorID());
 
-//				System.out.println("Checkout: AuthorNode Found");
-
-				double weight = (1.0/paperList.size());
-				for(Paper paper: paperList)
+				//				System.out.println("Checkout: AuthorNode Found");
+				if (authorNode != null)
 				{
-//					System.out.println("Checkout: PaperLoop-1");
-					Node paperNode = dbService.findNode(Label.label("paper"), "article_id", paper.getArticleId());
-					if (paperNode == null){System.out.println("Can not find paper with aid" + paper.getArticleId());}
-//					System.out.println("Checkout: PaperFound");
-					Relationship relationship = authorNode.createRelationshipTo(paperNode, RelationshipType.withName("written"));
-//					System.out.println("Checkout: Relationship Created");
-					relationship.setProperty("weight", weight);
-					relationship.setProperty("seq_no", paper.getSeq_no());
-//					System.out.println("Checkout: Relationship Properties Set");
-				}	
-			}
-
-			tx.success();
-			System.out.println("Checkout: Transaction Success");
-			tx.close();
-			System.out.println("Checkout: Transaction Close");
-		}
-
-		try (Transaction tx=dbService.beginTx()) 
-		{
-			System.out.println("Checkout: Transaction Begin");
-			for(Author author : authorList.subList(authorList.size()/2, authorList.size()))
-			{
-				List<Paper> paperList = author.getPaperList();
-
-				Node authorNode = dbService.findNode(Label.label("author"), "author_id", author.getAuthorID());
-
-//				System.out.println("Checkout: AuthorNode Found");
-
-				double weight = (1.0/paperList.size());
-				for(Paper paper: paperList)
-				{
-//					System.out.println("Checkout: PaperLoop-1");
-					Node paperNode = dbService.findNode(Label.label("paper"), "article_id", paper.getArticleId());
-//					System.out.println("Checkout: PaperFound");
-					Relationship relationship = authorNode.createRelationshipTo(paperNode, RelationshipType.withName("written"));
-//					System.out.println("Checkout: Relationship Created");
-					relationship.setProperty("weight", weight);
-					relationship.setProperty("seq_no", paper.getSeq_no());
-//					System.out.println("Checkout: Relationship Properties Set");
+					double weight = (1.0/paperList.size());
+					for(Paper paper: paperList)
+					{
+						//					System.out.println("Checkout: PaperLoop-1");
+						Node paperNode = dbService.findNode(Label.label("paper"), "article_id", paper.getArticleId());
+						if (paperNode == null){System.out.println("Can not find paper with aid" + paper.getArticleId());}
+						else{
+							//					System.out.println("Checkout: PaperFound");
+							Relationship relationship = authorNode.createRelationshipTo(paperNode, RelationshipType.withName("written"));
+							//					System.out.println("Checkout: Relationship Created");
+							relationship.setProperty("f_weight", weight);
+							relationship.setProperty("seq_no", paper.getSeq_no());
+							//					System.out.println("Checkout: Relationship Properties Set");
+						}
+					}
 				}
-
+				else {System.out.println("Can not find author with aid" + author.getAuthorID());}
 			}
+
+
 			tx.success();
 			System.out.println("Checkout: Transaction Success");
 			tx.close();

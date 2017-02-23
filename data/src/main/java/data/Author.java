@@ -7,6 +7,7 @@ public class Author {
 	private String firstName;
 	private String lastName;
 	private String authorID;
+	
 	private List<Paper> paperList;
 	
 	public List<Paper> getPaperList() {
