@@ -19,10 +19,10 @@ public class Main {
 //		
 //		createPaperNodes();
 //		System.out.println("Paper Nodes Created.");
-//		
-		//createJournalNodes();
+//	
+//		createJournalNodes();
 		
-		//createKeywordNodes();
+//		createKeywordNodes();
 		
 		connectAuthorPaper();
 	}
@@ -32,16 +32,30 @@ public class Main {
 		// TODO Auto-generated method stub
 		SQLAccessLayer sqlAccessLayer = new SQLAccessLayer();
 		List<Author> authorList = sqlAccessLayer.getUniqueAuthorListFromLocal();
-		System.out.println(authorList);
-		for(Author author : authorList)
+		//System.out.println(authorList);
+		int startIndex = 0; 
+		int batchSize = 10000;
+		int endIndex = 0;
+		do
 		{
-			List<Paper> paperList = sqlAccessLayer.getListOfPapersForAuthor(author);
-			System.out.println("SQL-Query Done");
-			Neo4jAccessLayer neo4jAccessLayer = new Neo4jAccessLayer();
-			neo4jAccessLayer.createAuthorPaperConnections(author, paperList);
-			System.out.println("Neo4j Add Done");
-		}
 		
+			endIndex = startIndex + batchSize;
+			if(endIndex > authorList.size()){ endIndex = authorList.size(); }
+			
+			List<Author> authorSubList = authorList.subList(startIndex, endIndex);
+			for(Author author : authorSubList)
+			{
+				List<Paper> paperList = sqlAccessLayer.getListOfPapersForAuthor(author);
+				author.setPaperList(paperList);
+				System.out.println("SQL-Query Done");
+			}
+			Neo4jAccessLayer neo4jAccessLayer = new Neo4jAccessLayer();
+			neo4jAccessLayer.createAuthorPaperConnection(authorSubList);
+			System.out.println("Neo4j Add Done");
+			
+			startIndex = endIndex;
+		}
+		while(startIndex < authorList.size());
 		
 	}
 
