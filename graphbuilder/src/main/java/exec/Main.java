@@ -8,6 +8,7 @@ import data.Keyword;
 import data.KeywordPaperRelationStore;
 import data.Paper;
 import data.PaperReferenceRelationStore;
+import data.Proceeding;
 import db.csv.CSVAccessLayer;
 import db.neo4j.Neo4jAccessLayer;
 import db.sql.SQLAccessLayer;
@@ -26,12 +27,23 @@ public class Main {
 		//		createJournalNodes();
 
 		//		createKeywordNodes();
+		
+		createConferenceNodes();
 
 		//connectAuthorPaper();
 
 		//connectKeywordAndPaper();
 		
-		connectPaperAndReferencePaper();
+//		connectPaperAndReferencePaper();
+	}
+
+
+	private static void createConferenceNodes() {
+		SQLAccessLayer sqlAccessLayer = new SQLAccessLayer();
+		List<Proceeding> proceedingList = sqlAccessLayer.getListOfProceeding();
+		
+		Neo4jAccessLayer neo4jAccessLayer = new Neo4jAccessLayer();
+		neo4jAccessLayer.createProceedingNodes(proceedingList);
 	}
 
 
