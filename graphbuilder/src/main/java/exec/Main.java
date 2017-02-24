@@ -7,6 +7,7 @@ import data.Author;
 import data.Keyword;
 import data.KeywordPaperRelationStore;
 import data.Paper;
+import data.PaperReferenceRelationStore;
 import db.csv.CSVAccessLayer;
 import db.neo4j.Neo4jAccessLayer;
 import db.sql.SQLAccessLayer;
@@ -28,7 +29,19 @@ public class Main {
 
 		//connectAuthorPaper();
 
-		connectKeywordAndPaper();
+		//connectKeywordAndPaper();
+		
+		connectPaperAndReferencePaper();
+	}
+
+
+	private static void connectPaperAndReferencePaper() {
+		
+		SQLAccessLayer sqlAccessLayer = new SQLAccessLayer();
+		PaperReferenceRelationStore paperAndReferenceRelationStore = sqlAccessLayer.getPaperAndReferenceRelationStore();
+		
+		Neo4jAccessLayer neo4jAccessLayer = new Neo4jAccessLayer();
+		neo4jAccessLayer.createPaperReferenceRelation(paperAndReferenceRelationStore);
 	}
 
 
