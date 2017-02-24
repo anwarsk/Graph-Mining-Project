@@ -1,9 +1,11 @@
 package exec;
 
 import java.util.List;
+import java.util.Spliterator;
 
 import data.Author;
 import data.Keyword;
+import data.KeywordPaperRelationStore;
 import data.Paper;
 import db.csv.CSVAccessLayer;
 import db.neo4j.Neo4jAccessLayer;
@@ -32,6 +34,12 @@ public class Main {
 
 	private static void connectKeywordAndPaper() {
 
+		//1. get PaperId keyword Id pairs
+		SQLAccessLayer sqlAccessLayer = new SQLAccessLayer();
+		KeywordPaperRelationStore keywordPaperRelationStore = sqlAccessLayer.getPaperIdKeywordIdRelations();
+		
+		Neo4jAccessLayer neo4jAccessLayer = new Neo4jAccessLayer();
+		neo4jAccessLayer.createPaperKeywordRelation(keywordPaperRelationStore);
 		
 	}
 
