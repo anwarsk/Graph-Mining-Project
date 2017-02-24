@@ -3,12 +3,15 @@ package exec;
 import java.util.List;
 import java.util.Spliterator;
 
+import org.apache.commons.collections4.map.MultiValueMap;
+
 import data.Author;
 import data.Keyword;
 import data.KeywordPaperRelationStore;
 import data.Paper;
 import data.PaperReferenceRelationStore;
 import data.Proceeding;
+import data.ProceedingPaperRelationStore;
 import db.csv.CSVAccessLayer;
 import db.neo4j.Neo4jAccessLayer;
 import db.sql.SQLAccessLayer;
@@ -28,13 +31,28 @@ public class Main {
 
 		//		createKeywordNodes();
 		
-		createConferenceNodes();
+		//createConferenceNodes();
 
 		//connectAuthorPaper();
 
 		//connectKeywordAndPaper();
 		
 //		connectPaperAndReferencePaper();
+		
+		connectProceedingAndPaper();
+//		MultiValueMap<Integer, Integer> a = new MultiValueMap<>();
+//		a.put(1,2); a.put(10, 20); a.put(1, 2);
+//		System.out.println(a);
+	}
+
+
+	private static void connectProceedingAndPaper() {
+		SQLAccessLayer sqlAccessLayer = new SQLAccessLayer();
+		ProceedingPaperRelationStore proceedingAndPaperRelationStore = sqlAccessLayer.getProceedingAndPaperRelationStore();
+		
+		Neo4jAccessLayer neo4jAccessLayer = new Neo4jAccessLayer();
+		neo4jAccessLayer.createProceedingAndPaperRelation(proceedingAndPaperRelationStore);
+
 	}
 
 
