@@ -17,6 +17,7 @@ import data.Author;
 import data.Keyword;
 import data.KeywordPaperRelationStore;
 import data.Paper;
+import data.PaperReferenceRelationStore;
 import data.PaperType;
 
 public class SQLAccessLayer {
@@ -480,6 +481,69 @@ public class SQLAccessLayer {
 			}//end finally try
 		}//end try
 		return keywordPaperRelationStore;
+	}
+
+	public PaperReferenceRelationStore getPaperAndReferenceRelationStore() {
+		
+		String DB_URL = "localhost";
+		String USERNAME = "root";
+		String PASSWORD = "root";
+//		
+		MysqlDataSource dataSource = new MysqlDataSource();
+		dataSource.setUser(USERNAME);
+		dataSource.setPassword(PASSWORD);
+		dataSource.setServerName(DB_URL);
+		
+		PaperReferenceRelationStore paperAndReferenceRelationStore = new PaperReferenceRelationStore();
+
+		String query = "select article_id, ref_obj_id from acm2015.paper_ref where ref_obj_id>0;";
+		System.out.println("Executing query:" + query);
+		Connection conn = null;
+		Statement stmt = null;
+		try{
+			//STEP 3: Open a connection
+			conn = dataSource.getConnection();
+
+			//STEP 4: Execute a query
+			stmt = conn.createStatement();
+			String sql;
+			sql = query;
+			ResultSet rs = stmt.executeQuery(sql);
+
+			//STEP 5: Extract data from result set
+			while(rs.next()){
+				//Retrieve by column name
+				int articleId = rs.getInt("article_id");
+				int referenceArticleId = rs.getInt("ref_obj_id");
+				
+				paperAndReferenceRelationStore.addRelations(articleId, referenceArticleId);
+
+			}
+			//STEP 6: Clean-up environment
+			rs.close();
+			stmt.close();
+			conn.close();
+		}catch(SQLException se){
+			//Handle errors for JDBC
+			se.printStackTrace();
+		}catch(Exception e){
+			//Handle errors for Class.forName
+			e.printStackTrace();
+		}finally{
+			//finally block used to close resources
+			try{
+				if(stmt!=null)
+					stmt.close();
+			}catch(SQLException se2){
+			}// nothing we can do
+			try{
+				if(conn!=null)
+					conn.close();
+			}catch(SQLException se){
+				se.printStackTrace();
+			}//end finally try
+		}//end try
+		return paperAndReferenceRelationStore;
 	}
 
 
