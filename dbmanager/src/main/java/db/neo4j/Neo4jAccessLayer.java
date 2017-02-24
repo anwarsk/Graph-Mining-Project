@@ -21,6 +21,7 @@ import data.KeywordPaperRelationStore;
 import data.Paper;
 import data.PaperReferenceRelationStore;
 import data.Proceeding;
+import data.ProceedingPaperRelationStore;
 
 public class Neo4jAccessLayer {
 
@@ -336,5 +337,56 @@ public class Neo4jAccessLayer {
 		}
 
 		dbService.shutdown();		
+	}
+
+	public void createProceedingAndPaperRelation(ProceedingPaperRelationStore proceedingAndPaperRelationStore) {
+		assert proceedingAndPaperRelationStore != null : "Null Keyword Paper Relation Stores";
+
+		System.out.println("SIZE>=" + proceedingAndPaperRelationStore.size());
+		List<Integer> proceedingIds =  new ArrayList<Integer>(proceedingAndPaperRelationStore.getProceedingIds());
+
+		int startIndex = 0; 
+		int batchSize = 20000;
+		int endIndex = 0;
+
+		File databaseDirectory = new File(DB_PATH);
+		GraphDatabaseService dbService = new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
+		do
+		{
+			endIndex = startIndex + batchSize;
+			if(endIndex > proceedingIds.size()){ endIndex = proceedingIds.size(); }
+
+			try (Transaction tx=dbService.beginTx()) 
+			{
+				List<Integer> proceedingIdSubList = proceedingIds.subList(startIndex, endIndex);
+				for(Integer proceedingId : proceedingIdSubList)
+				{
+					Node proceedingNode = dbService.findNode(Label.label("proceeding"), "proc_id", proceedingId);
+					if(proceedingNode != null)
+					{
+						List<Integer> articleIds = proceedingAndPaperRelationStore.getListOfArticleIds(proceedingId);
+						double weight = 1.0/articleIds.size();
+						for(Integer articleId : articleIds)
+						{
+							Node paperNode = dbService.findNode(Label.label("paper"), "article_id", articleId);
+							if(paperNode != null)
+							{
+								Relationship relation = paperNode.createRelationshipTo(proceedingNode, RelationshipType.withName("published_at"));
+								relation.setProperty("b_weight", weight);
+							}
+						}
+					}
+					System.out.println("Processed Proceeding Id:" + proceedingId);
+				}
+				tx.success();
+				System.out.println("Checkout: Transaction Success");
+				tx.close();
+			}
+			startIndex = endIndex;
+		}
+		while(startIndex < proceedingIds.size());
+		dbService.shutdown();
+		System.out.println("Checkout: Database Shutdown");
+		
 	}
 }
