@@ -19,6 +19,7 @@ import data.Author;
 import data.Keyword;
 import data.KeywordPaperRelationStore;
 import data.Paper;
+import data.PaperReferenceRelationStore;
 
 public class Neo4jAccessLayer {
 
@@ -257,5 +258,57 @@ public class Neo4jAccessLayer {
 		while(startIndex < articleIds.size());
 		dbService.shutdown();
 		System.out.println("Checkout: Database Shutdown");
+	}
+
+	public void createPaperReferenceRelation(PaperReferenceRelationStore paperAndReferenceRelationStore) {
+		
+		assert paperAndReferenceRelationStore != null : "Null Keyword Paper Relation Stores";
+
+		System.out.println("SIZE>=" + paperAndReferenceRelationStore.size());
+		List<Integer> articleIds =  new ArrayList<Integer>(paperAndReferenceRelationStore.getArticleIds());
+
+		int startIndex = 0; 
+		int batchSize = 10000;
+		int endIndex = 0;
+
+		File databaseDirectory = new File(DB_PATH);
+		GraphDatabaseService dbService = new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
+		do
+		{
+			endIndex = startIndex + batchSize;
+			if(endIndex > articleIds.size()){ endIndex = articleIds.size(); }
+
+			try (Transaction tx=dbService.beginTx()) 
+			{
+				List<Integer> articleIdSubList = articleIds.subList(startIndex, endIndex);
+				for(Integer articleId : articleIdSubList)
+				{
+					Node paperNode = dbService.findNode(Label.label("paper"), "article_id", articleId);
+					if(paperNode != null)
+					{
+						List<Integer> refArticleIds = paperAndReferenceRelationStore.getListOfReferenceIds(articleId);
+						double weight = 1.0/refArticleIds.size();
+						for(Integer refArticleId : refArticleIds)
+						{
+							Node referencePaperNode = dbService.findNode(Label.label("paper"), "article_id", refArticleId);
+							if(referencePaperNode != null)
+							{
+								Relationship relation = paperNode.createRelationshipTo(referencePaperNode, RelationshipType.withName("cite"));
+								relation.setProperty("f_weight", weight);
+							}
+						}
+					}
+					System.out.println("Processed Article Id:" + articleId);
+				}
+				tx.success();
+				System.out.println("Checkout: Transaction Success");
+				tx.close();
+			}
+			startIndex = endIndex;
+		}
+		while(startIndex < articleIds.size());
+		dbService.shutdown();
+		System.out.println("Checkout: Database Shutdown");
+		
 	}
 }
