@@ -20,6 +20,7 @@ import data.Keyword;
 import data.KeywordPaperRelationStore;
 import data.Paper;
 import data.PaperReferenceRelationStore;
+import data.Proceeding;
 
 public class Neo4jAccessLayer {
 
@@ -310,5 +311,30 @@ public class Neo4jAccessLayer {
 		dbService.shutdown();
 		System.out.println("Checkout: Database Shutdown");
 		
+	}
+
+	public void createProceedingNodes(List<Proceeding> proceedingList) {
+		assert proceedingList.isEmpty() == false : "Empty Proceeding List";
+
+		File databaseDirectory = new File(DB_PATH);
+		GraphDatabaseService dbService = new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
+
+		
+		try (Transaction tx=dbService.beginTx()) 
+		{
+			for(Proceeding proceeding: proceedingList)
+			{
+				Node node = dbService.createNode();
+				node.addLabel(Label.label("proceeding"));
+				node.setProperty("proc_id", proceeding.getId());
+				node.setProperty("series_id", proceeding.getSeries_id());
+				node.setProperty("series_title", proceeding.getSeries_title());
+				node.setProperty("year", proceeding.getYear());
+			}
+			tx.success();
+			tx.close();
+		}
+
+		dbService.shutdown();		
 	}
 }
