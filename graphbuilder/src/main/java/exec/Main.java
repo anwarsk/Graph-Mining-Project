@@ -52,7 +52,6 @@ public class Main {
 		
 		Neo4jAccessLayer neo4jAccessLayer = new Neo4jAccessLayer();
 		neo4jAccessLayer.createProceedingAndPaperRelation(proceedingAndPaperRelationStore);
-
 	}
 
 
