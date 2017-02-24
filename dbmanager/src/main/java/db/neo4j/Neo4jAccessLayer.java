@@ -1,7 +1,10 @@
 package db.neo4j;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.Spliterator;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
@@ -14,6 +17,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import data.Author;
 import data.Keyword;
+import data.KeywordPaperRelationStore;
 import data.Paper;
 
 public class Neo4jAccessLayer {
@@ -200,6 +204,57 @@ public class Neo4jAccessLayer {
 			System.out.println("Checkout: Transaction Close");
 		}
 
+		dbService.shutdown();
+		System.out.println("Checkout: Database Shutdown");
+	}
+
+	public void createPaperKeywordRelation(KeywordPaperRelationStore keywordPaperRelationStore) {
+		// TODO Auto-generated method stub
+		assert keywordPaperRelationStore != null : "Null Keyword Paper Relation Stores";
+
+		System.out.println("SIZE>=" + keywordPaperRelationStore.size());
+		List<Long> articleIds =  new ArrayList<Long>(keywordPaperRelationStore.getArticleIds());
+
+		int startIndex = 0; 
+		int batchSize = 20000;
+		int endIndex = 0;
+
+		File databaseDirectory = new File(DB_PATH);
+		GraphDatabaseService dbService = new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
+		do
+		{
+			endIndex = startIndex + batchSize;
+			if(endIndex > articleIds.size()){ endIndex = articleIds.size(); }
+
+			try (Transaction tx=dbService.beginTx()) 
+			{
+				List<Long> articleIdSubList = articleIds.subList(startIndex, endIndex);
+				for(Long articleId : articleIdSubList)
+				{
+					Node paperNode = dbService.findNode(Label.label("paper"), "article_id", articleId);
+					if(paperNode != null)
+					{
+						List<Long> keywordIds = keywordPaperRelationStore.getListOfRelatedKeywords(articleId);
+						double weight = 1.0/keywordIds.size();
+						for(Long keywordId : keywordIds)
+						{
+							Node keywordNode = dbService.findNode(Label.label("keyword"), "keyword_id", keywordId);
+							if(keywordNode != null)
+							{
+								Relationship relation = paperNode.createRelationshipTo(keywordNode, RelationshipType.withName("contains"));
+								relation.setProperty("f_weight", weight);
+							}
+						}
+					}
+					System.out.println("Processed Article Id:" + articleId);
+				}
+				tx.success();
+				System.out.println("Checkout: Transaction Success");
+				tx.close();
+			}
+			startIndex = endIndex;
+		}
+		while(startIndex < articleIds.size());
 		dbService.shutdown();
 		System.out.println("Checkout: Database Shutdown");
 	}
