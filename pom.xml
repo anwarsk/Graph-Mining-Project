@@ -13,5 +13,6 @@
 
 
 		<module>analyzer</module>
+		<module>summarizer</module>
 	</modules>
 </project>
