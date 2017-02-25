@@ -12,5 +12,6 @@
 		<module>graphbuilder</module>
 
 
+		<module>analyzer</module>
 	</modules>
 </project>
