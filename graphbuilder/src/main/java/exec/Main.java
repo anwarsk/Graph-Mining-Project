@@ -37,7 +37,7 @@ public class Main {
 		
 //		connectPaperAndReferencePaper();
 		
-		connectPaperAndJournal();
+//		connectPaperAndJournal();
 		
 		//connectProceedingAndPaper();
 //		MultiValueMap<Integer, Integer> a = new MultiValueMap<>();
