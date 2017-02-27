@@ -17,6 +17,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import data.Author;
 import data.Journal;
+import data.JournalPaperRelationStore;
 import data.Keyword;
 import data.KeywordPaperRelationStore;
 import data.Paper;
@@ -417,5 +418,58 @@ public class Neo4jAccessLayer {
 
 		dbService.shutdown();		
 
+	}
+
+	public void createJournalAndPaperRelation(JournalPaperRelationStore journalAndPaperRelationStore) {
+		
+		assert journalAndPaperRelationStore != null : "Null Journal and Paper Relation Store";
+		assert journalAndPaperRelationStore.size() > 0 : "Empty Journal and Paper Relation Store";	
+
+		System.out.println("SIZE>=" + journalAndPaperRelationStore.size());
+		List<Integer> JournalUIds =  new ArrayList<Integer>(journalAndPaperRelationStore.getJournalUIds());
+
+		int startIndex = 0; 
+		int batchSize = 10000;
+		int endIndex = 0;
+
+		File databaseDirectory = new File(DB_PATH);
+		GraphDatabaseService dbService = new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
+		do
+		{
+			endIndex = startIndex + batchSize;
+			if(endIndex > JournalUIds.size()){ endIndex = JournalUIds.size(); }
+
+			try (Transaction tx=dbService.beginTx()) 
+			{
+				List<Integer> journalUIdSubList = JournalUIds.subList(startIndex, endIndex);
+				for(Integer journalUId : journalUIdSubList)
+				{
+					Node journalNode = dbService.findNode(Label.label("journal"), "journal_uid", journalUId);
+					if(journalNode != null)
+					{
+						List<Integer> articleIds = journalAndPaperRelationStore.getListOfArticleIds(journalUId);
+						double weight = 1.0/articleIds.size();
+						for(Integer articleId : articleIds)
+						{
+							Node paperNode = dbService.findNode(Label.label("paper"), "article_id", articleId);
+							if(paperNode != null)
+							{
+								Relationship relation = paperNode.createRelationshipTo(journalNode, RelationshipType.withName("published_in"));
+								relation.setProperty("b_weight", weight);
+							}
+						}
+					}
+					System.out.println("Processed Proceeding Id:" + journalUId);
+				}
+				tx.success();
+				System.out.println("Checkout: Transaction Success");
+				tx.close();
+			}
+			startIndex = endIndex;
+		}
+		while(startIndex < JournalUIds.size());
+		dbService.shutdown();
+		System.out.println("Checkout: Database Shutdown");
+		
 	}
 }
