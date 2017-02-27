@@ -21,6 +21,7 @@ import data.PaperReferenceRelationStore;
 import data.PaperType;
 import data.Proceeding;
 import data.ProceedingPaperRelationStore;
+import data.Journal;
 
 public class SQLAccessLayer {
 
@@ -673,6 +674,70 @@ public class SQLAccessLayer {
 			}//end finally try
 		}//end try
 		return proceedingAndPaperRelationStore;
+	}
+
+	public List<Journal> getListOfJournals() {
+		String DB_URL = "localhost";
+		String USERNAME = "root";
+		String PASSWORD = "root";
+
+		MysqlDataSource dataSource = new MysqlDataSource();
+		dataSource.setUser(USERNAME);
+		dataSource.setPassword(PASSWORD);
+		dataSource.setServerName(DB_URL);
+		
+		List<Journal> journalList = new ArrayList<Journal>();
+
+		String query = "select * from acm2015.journal_uid;";
+		System.out.println("Executing query:" + query);
+		Connection conn = null;
+		Statement stmt = null;
+		try{
+
+			conn = dataSource.getConnection();
+
+			//STEP 4: Execute a query
+			stmt = conn.createStatement();
+
+			String sql;
+			sql = query;
+			ResultSet rs = stmt.executeQuery(sql);
+			//STEP 5: Extract data from result set
+			while(rs.next()){
+				//Retrieve by column name
+				int journal_uid = rs.getInt("journal_uid");
+				String journal_id = rs.getString("journal_id");
+				String journal_name = rs.getString("journal_name");
+				int year = rs.getInt("year");
+
+				Journal journal = new Journal(journal_uid, journal_id, journal_name, year);
+				journalList.add(journal);
+			}
+			//STEP 6: Clean-up environment
+			rs.close();
+			stmt.close();
+			conn.close();
+		}catch(SQLException se){
+			//Handle errors for JDBC
+			se.printStackTrace();
+		}catch(Exception e){
+			//Handle errors for Class.forName
+			e.printStackTrace();
+		}finally{
+			//finally block used to close resources
+			try{
+				if(stmt!=null)
+					stmt.close();
+			}catch(SQLException se2){
+			}// nothing we can do
+			try{
+				if(conn!=null)
+					conn.close();
+			}catch(SQLException se){
+				se.printStackTrace();
+			}//end finally try
+		}//end try
+		return journalList;
 	}
 
 
