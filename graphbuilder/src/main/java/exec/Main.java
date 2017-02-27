@@ -3,6 +3,7 @@ package exec;
 import java.util.List;
 
 import data.Author;
+import data.Journal;
 import data.Keyword;
 import data.KeywordPaperRelationStore;
 import data.Paper;
@@ -23,7 +24,7 @@ public class Main {
 		//		createPaperNodes();
 		//		System.out.println("Paper Nodes Created.");
 		//	
-		//		createJournalNodes();
+//				createJournalNodes();
 
 		//		createKeywordNodes();
 		
@@ -34,6 +35,7 @@ public class Main {
 		//connectKeywordAndPaper();
 		
 //		connectPaperAndReferencePaper();
+		
 		
 		//connectProceedingAndPaper();
 //		MultiValueMap<Integer, Integer> a = new MultiValueMap<>();
@@ -163,7 +165,12 @@ public class Main {
 	}
 
 	private static void createJournalNodes() {
-		// TODO Auto-generated method stub
+		SQLAccessLayer sqlAccessLayer = new SQLAccessLayer();
+		List<Journal> journalList = sqlAccessLayer.getListOfJournals();
+		System.out.println("Journal Data Fetched.");
+
+		Neo4jAccessLayer neo4jAccessLayer = new Neo4jAccessLayer();
+		neo4jAccessLayer.addJournalNodes(journalList);
 
 	}
 
