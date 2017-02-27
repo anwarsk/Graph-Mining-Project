@@ -22,6 +22,7 @@ import data.PaperType;
 import data.Proceeding;
 import data.ProceedingPaperRelationStore;
 import data.Journal;
+import data.JournalPaperRelationStore;
 
 public class SQLAccessLayer {
 
@@ -738,6 +739,69 @@ public class SQLAccessLayer {
 			}//end finally try
 		}//end try
 		return journalList;
+	}
+
+	public JournalPaperRelationStore getJournalAndPaperRelationStore() {
+		String DB_URL = "localhost";
+		String USERNAME = "root";
+		String PASSWORD = "root";
+
+		MysqlDataSource dataSource = new MysqlDataSource();
+		dataSource.setUser(USERNAME);
+		dataSource.setPassword(PASSWORD);
+		dataSource.setServerName(DB_URL);
+		
+		JournalPaperRelationStore journalAndPaperRelationStore = new JournalPaperRelationStore();
+
+		String query = "select distinct journal_uid, article_id from acm2015.paper_journal_uid;";
+		System.out.println("Executing query:" + query);
+		Connection conn = null;
+		Statement stmt = null;
+		try{
+			//STEP 3: Open a connection
+			conn = dataSource.getConnection();
+
+			//STEP 4: Execute a query
+			stmt = conn.createStatement();
+			String sql;
+			sql = query;
+			ResultSet rs = stmt.executeQuery(sql);
+
+			//STEP 5: Extract data from result set
+			while(rs.next()){
+				//Retrieve by column name
+				int journalUId = rs.getInt("journal_uid");
+				int articleId = rs.getInt("article_id");
+				
+				journalAndPaperRelationStore.addRelations(journalUId, articleId);
+
+			}
+			//STEP 6: Clean-up environment
+			rs.close();
+			stmt.close();
+			conn.close();
+		}catch(SQLException se){
+			//Handle errors for JDBC
+			se.printStackTrace();
+		}catch(Exception e){
+			//Handle errors for Class.forName
+			e.printStackTrace();
+		}finally{
+			//finally block used to close resources
+			try{
+				if(stmt!=null)
+					stmt.close();
+			}catch(SQLException se2){
+			}// nothing we can do
+			try{
+				if(conn!=null)
+					conn.close();
+			}catch(SQLException se){
+				se.printStackTrace();
+			}//end finally try
+		}//end try
+		return journalAndPaperRelationStore;
+
 	}
 
 
