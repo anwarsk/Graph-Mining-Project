@@ -4,6 +4,7 @@ import java.util.List;
 
 import data.Author;
 import data.Journal;
+import data.JournalPaperRelationStore;
 import data.Keyword;
 import data.KeywordPaperRelationStore;
 import data.Paper;
@@ -36,11 +37,22 @@ public class Main {
 		
 //		connectPaperAndReferencePaper();
 		
+		connectPaperAndJournal();
 		
 		//connectProceedingAndPaper();
 //		MultiValueMap<Integer, Integer> a = new MultiValueMap<>();
 //		a.put(1,2); a.put(10, 20); a.put(1, 2);
 //		System.out.println(a);
+	}
+
+
+	private static void connectPaperAndJournal() {
+		
+		SQLAccessLayer sqlAccessLayer = new SQLAccessLayer();
+		JournalPaperRelationStore journalAndPaperRelationStore = sqlAccessLayer.getJournalAndPaperRelationStore();
+		
+		Neo4jAccessLayer neo4jAccessLayer = new Neo4jAccessLayer();
+		neo4jAccessLayer.createJournalAndPaperRelation(journalAndPaperRelationStore);
 	}
 
 
