@@ -1,11 +1,15 @@
 package db.csv;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
 import data.Author;
+import data.EvaluationInput;
 import data.Keyword;
 import data.Paper;
 
@@ -39,7 +43,7 @@ public class CSVAccessLayer {
 
 	public void writePapersToCSV(List<Paper> paperList) {
 		// TODO Auto-generated method stub
-		
+
 		assert paperList.isEmpty() == false : "Empty Author List";
 
 		String fileName = "paper.csv";
@@ -84,6 +88,40 @@ public class CSVAccessLayer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public EvaluationInput readEvaluationInput(String inputFilePath)
+	{
+		assert inputFilePath != null : "Null input file path";
+		assert inputFilePath != "" : "Empty input file path";
+
+		EvaluationInput evaluationInput = new EvaluationInput();
+
+		String line = "";
+		
+		try (BufferedReader buffReader = new BufferedReader(new FileReader(inputFilePath))) 
+		{
+			buffReader.readLine();
+
+			while ((line = buffReader.readLine()) != null) {
+
+				// use comma as separator
+				String[] data = line.split(",");
+
+				evaluationInput.addEntry(data[0], Integer.parseInt(data[1]));
+				
+			}
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+
+		return evaluationInput;
 	}
 
 }
