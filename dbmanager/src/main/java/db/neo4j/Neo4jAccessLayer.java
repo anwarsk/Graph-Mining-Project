@@ -16,6 +16,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import data.Author;
+import data.Journal;
 import data.Keyword;
 import data.KeywordPaperRelationStore;
 import data.Paper;
@@ -388,5 +389,33 @@ public class Neo4jAccessLayer {
 		dbService.shutdown();
 		System.out.println("Checkout: Database Shutdown");
 		
+	}
+
+	public void addJournalNodes(List<Journal> journalList) {
+		
+		assert journalList != null : "Null Journal List";
+		assert journalList.isEmpty() == false : "Empty Proceeding List";
+
+		File databaseDirectory = new File(DB_PATH);
+		GraphDatabaseService dbService = new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
+
+		
+		try (Transaction tx=dbService.beginTx()) 
+		{
+			for(Journal journal: journalList)
+			{
+				Node node = dbService.createNode();
+				node.addLabel(Label.label("journal"));
+				node.setProperty("journal_uid", journal.getJournal_uid());
+				node.setProperty("journal_id", journal.getJournal_id());
+				node.setProperty("journal_name", journal.getJournal_name());
+				node.setProperty("year", journal.getYear());
+			}
+			tx.success();
+			tx.close();
+		}
+
+		dbService.shutdown();		
+
 	}
 }
