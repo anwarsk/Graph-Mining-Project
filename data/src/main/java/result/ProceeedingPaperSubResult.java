@@ -1,19 +1,20 @@
 package result;
 
 import java.util.Collections;
-import java.util.PriorityQueue;
+
+import com.google.common.collect.MinMaxPriorityQueue;
 
 public class ProceeedingPaperSubResult implements Comparable<ProceeedingPaperSubResult> {
 
 	private int proceedingArticleId;
 	private double score;
 
-	private PriorityQueue<AuthorPaperSubResult> authorPaperSubResults;
+	private MinMaxPriorityQueue<AuthorPaperSubResult> authorPaperSubResults;
 
 	public ProceeedingPaperSubResult(int procArticleId) {
 
 		this.proceedingArticleId = procArticleId;
-		authorPaperSubResults = new PriorityQueue<AuthorPaperSubResult>(20, Collections.reverseOrder());
+		authorPaperSubResults = MinMaxPriorityQueue.orderedBy(Collections.reverseOrder()).maximumSize(20).create();
 	}
 
 	public void addAuthorPaperSubResult(AuthorPaperSubResult authorPaperSubResult) {
