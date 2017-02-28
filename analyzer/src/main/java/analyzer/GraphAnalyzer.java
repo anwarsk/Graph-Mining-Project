@@ -33,39 +33,45 @@ public class GraphAnalyzer {
 
 			Node author = dbService.findNode(Label.label("author"), "author_id", authorId);
 			if(author == null){ System.out.println("Can not find author with id-" + authorId); return null;}
-			
+
 			Node proceeding = dbService.findNode(Label.label("proceeding"), "proc_id", proceedingId);
 			if(proceeding == null){ System.out.println("Can not find proceeding with id-" + proceedingId); return null;}
-			
+
 			Iterator<Relationship> writtenRelations = author.getRelationships(RelationshipType.withName("written")).iterator();
 			Iterator<Relationship> publishedRelations = proceeding.getRelationships(RelationshipType.withName("published_at")).iterator();
-			
+
 			PathExpander<Object> pathExpander = this.createPathExpander();
-			
-			while(writtenRelations.hasNext())
+
+			while(publishedRelations.hasNext())
 			{
-				Node authorPaperNode = writtenRelations.next().getEndNode();
-				
-				while(publishedRelations.hasNext())
+				Node procPaperNode = publishedRelations.next().getStartNode();
+				double procPaperScore = 0;
+
+				while(writtenRelations.hasNext())
 				{
-					Node procPaperNode = publishedRelations.next().getStartNode();
+					double authorPaperScore =  1.0;
+					Node authorPaperNode = writtenRelations.next().getEndNode();
 					
 					PathFinder<Path> allPathFinder = GraphAlgoFactory.allSimplePaths(pathExpander,MAX_TREE_DEPTH);
-
 					Iterable<Path> allPaths = allPathFinder.findAllPaths(authorPaperNode, procPaperNode);
 					
+					for(Path path : allPaths)
+					{
+						//if()
+					}
+
 				}
 			}
-			
+
 			tx.success();
 			tx.close();
 		}
 
 		dbService.shutdown();
-		
+
 		return null;
 	}
-	
+
 	private PathExpander<Object> createPathExpander()
 	{
 		PathExpander<Object> pathExpander = null;
