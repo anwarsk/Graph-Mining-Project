@@ -1,4 +1,4 @@
-package data;
+package result;
 
 import java.util.Map;
 
