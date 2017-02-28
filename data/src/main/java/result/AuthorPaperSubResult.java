@@ -4,18 +4,20 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.PriorityQueue;
 
+import com.google.common.collect.MinMaxPriorityQueue;
+
 public class AuthorPaperSubResult implements Comparable<AuthorPaperSubResult> {
 
 
 	private int authorArticleId;
 	private double score;
-	PriorityQueue<KeywordSubResult> keywords;
+	MinMaxPriorityQueue<KeywordSubResult> keywords;
 
 	public AuthorPaperSubResult(int authorArticleId, double authorPaperScore) 
 	{
 		this.authorArticleId = authorArticleId;
 		this.score = authorPaperScore;
-		this.keywords = new PriorityQueue<KeywordSubResult>(20, Collections.reverseOrder());
+		this.keywords = MinMaxPriorityQueue.orderedBy(Collections.reverseOrder()).maximumSize(20).create();
 	}
 
 	public void addKeywords(Map<Integer, Double> keywordIdToScoreMap)
