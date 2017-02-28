@@ -3,6 +3,7 @@ package exec;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
+import analyzer.GraphAnalyzer;
 import data.EvaluationInput;
 import db.csv.CSVAccessLayer;
 
@@ -17,6 +18,9 @@ public class Main {
 		EvaluationInput evaluationInput = csvAccessLayer.readEvaluationInput(INPUT_FILE_PATH);
 		System.out.println(evaluationInput.size());
 		
+		
+		GraphAnalyzer analyzer = new GraphAnalyzer();
+		
 		// Send the input to analyzer for analysis
 		Iterator<Entry<String, Integer>> inputIterator = evaluationInput.getIterator();
 		while(inputIterator.hasNext())
@@ -25,7 +29,8 @@ public class Main {
 			String authorId = entry.getKey();
 			int proc_id = entry.getValue();
 			
-			// find 
+			// find nodes between these ids
+			
 		}
 	}
 
