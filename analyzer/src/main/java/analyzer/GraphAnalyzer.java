@@ -3,17 +3,23 @@ package analyzer;
 import java.io.File;
 import java.util.Iterator;
 
+import org.neo4j.graphalgo.GraphAlgoFactory;
+import org.neo4j.graphalgo.PathFinder;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Path;
+import org.neo4j.graphdb.PathExpander;
+import org.neo4j.graphdb.PathExpanderBuilder;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.graphdb.Label;
 
 public class GraphAnalyzer {
 
 	private String NEO_GRAPH_DB_PATH = "";
+	private int MAX_TREE_DEPTH = 4;
 
 	public String generateResults(String authorId, int proceedingId)
 	{
@@ -34,6 +40,8 @@ public class GraphAnalyzer {
 			Iterator<Relationship> writtenRelations = author.getRelationships(RelationshipType.withName("written")).iterator();
 			Iterator<Relationship> publishedRelations = proceeding.getRelationships(RelationshipType.withName("published_at")).iterator();
 			
+			PathExpander<Object> pathExpander = this.createPathExpander();
+			
 			while(writtenRelations.hasNext())
 			{
 				Node authorPaperNode = writtenRelations.next().getEndNode();
@@ -42,6 +50,9 @@ public class GraphAnalyzer {
 				{
 					Node procPaperNode = publishedRelations.next().getStartNode();
 					
+					PathFinder<Path> allPathFinder = GraphAlgoFactory.allSimplePaths(pathExpander,MAX_TREE_DEPTH);
+
+					Iterable<Path> allPaths = allPathFinder.findAllPaths(authorPaperNode, procPaperNode);
 					
 				}
 			}
@@ -53,5 +64,19 @@ public class GraphAnalyzer {
 		dbService.shutdown();
 		
 		return null;
+	}
+	
+	private PathExpander<Object> createPathExpander()
+	{
+		PathExpander<Object> pathExpander = null;
+
+		PathExpanderBuilder pathExpanderBuilder = PathExpanderBuilder.empty();
+
+		NodeFilter nodeFilter = new NodeFilter();
+		pathExpanderBuilder = pathExpanderBuilder.addNodeFilter(nodeFilter);
+
+		pathExpander = pathExpanderBuilder.build();
+
+		return pathExpander;
 	}
 }
