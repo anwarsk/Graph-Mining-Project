@@ -9,7 +9,8 @@ import db.csv.CSVAccessLayer;
 
 public class Main {
 
-	private static final String INPUT_FILE_PATH = "D:\\Work\\Database\\CSV\\evaluation_aid_proc_id_gt_5.csv";
+	//private static final String INPUT_FILE_PATH = "D:\\Work\\Database\\CSV\\evaluation_aid_proc_id_gt_5.csv";
+	private static final String INPUT_FILE_PATH = "D:\\Work\\Database\\CSV\\evaluation_aid_proc_id_gt_5 _test.csv";
 	
 	public static void main(String[] args) {
 	
@@ -27,10 +28,10 @@ public class Main {
 		{
 			Entry<String, Integer> entry = inputIterator.next();
 			String authorId = entry.getKey();
-			int proc_id = entry.getValue();
+			int proceedingId = entry.getValue();
 			
 			// find nodes between these ids
-			
+			analyzer.generateResults(authorId, proceedingId);
 		}
 	}
 
