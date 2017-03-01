@@ -7,11 +7,10 @@
 	<packaging>pom</packaging>
 	<name>GraphMiner</name>
 	<modules>
+		<module>environment</module>
 		<module>data</module>
 		<module>dbmanager</module>
 		<module>graphbuilder</module>
-
-
 		<module>analyzer</module>
 		<module>summarizer</module>
 	</modules>
