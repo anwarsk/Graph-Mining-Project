@@ -6,6 +6,6 @@ public class ResultProcessor {
 
 	public void process(Result result)
 	{
-		
+		assert result !=  null : "Invalid Result";
 	}
 }
