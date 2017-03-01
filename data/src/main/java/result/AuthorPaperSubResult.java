@@ -1,9 +1,8 @@
 package result;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.PriorityQueue;
-
 import com.google.common.collect.MinMaxPriorityQueue;
 
 public class AuthorPaperSubResult implements Comparable<AuthorPaperSubResult> {
@@ -30,6 +29,14 @@ public class AuthorPaperSubResult implements Comparable<AuthorPaperSubResult> {
 
 	}
 
+	public int getAuthorArticleId() {
+		return authorArticleId;
+	}
+
+	public double getScore() {
+		return score;
+	}
+
 	public int compareTo(AuthorPaperSubResult that) {
 		int result = 0;
 		if(this.score > that.score)
@@ -40,8 +47,12 @@ public class AuthorPaperSubResult implements Comparable<AuthorPaperSubResult> {
 		{
 			result = -1;
 		}
-
 		return result;
+	}
+
+	public Iterator<KeywordSubResult> getKeywordSubResultIterator() {
+		// TODO Auto-generated method stub
+		return this.keywords.iterator();
 	}
 
 }
