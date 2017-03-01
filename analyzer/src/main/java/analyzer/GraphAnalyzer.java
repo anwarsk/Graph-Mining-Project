@@ -21,20 +21,21 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import result.AuthorPaperSubResult;
 import result.ProceeedingPaperSubResult;
 import result.Result;
-
+import environment.Constant;
 
 public class GraphAnalyzer {
 
-	private String NEO_GRAPH_DB_PATH = "./../../../Database/graph.acm2015";
-	private int MAX_TREE_DEPTH = 4;
+	private String NEO_GRAPH_DB_PATH = Constant.NEO_GRAPH_DB_PATH;
+	private int MAX_TREE_DEPTH = 6;//Constant.MAX_PATH_DEPTH;
 
-	public String generateResults(String authorId, int proceedingId)
+	public Result generateResults(String authorId, int proceedingId)
 	{
 		assert authorId != null && authorId.isEmpty() == false : "Invalid Author Id";
 		assert proceedingId >0 : "Invalid Proceeding Id";
 		
 		File databaseDirectory = new File(NEO_GRAPH_DB_PATH);
 		GraphDatabaseService dbService =  new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
+		Result result =  null;
 
 		try (Transaction tx=dbService.beginTx()) 
 		{
@@ -45,22 +46,25 @@ public class GraphAnalyzer {
 			Node proceeding = dbService.findNode(Label.label("proceeding"), "proc_id", proceedingId);
 			if(proceeding == null){ System.out.println("Can not find proceeding with id-" + proceedingId); return null;}
 
-			Iterator<Relationship> writtenRelations = author.getRelationships(RelationshipType.withName("written")).iterator();
+			
 			Iterator<Relationship> publishedRelations = proceeding.getRelationships(RelationshipType.withName("published_at")).iterator();
 
 			PathExpander<Object> pathExpander = this.createPathExpander();
 			WeightCalculator weightCalculator = new WeightCalculator();
 
-			Result result = new Result(authorId, proceedingId);
+			result = new Result(authorId, proceedingId);
 			
 			while(publishedRelations.hasNext())
 			{
 				Node procPaperNode = publishedRelations.next().getStartNode();
 				int procArticleId = (int)(long) procPaperNode.getProperty("article_id"); 
+				System.out.println("Running for Proceeding article_id" + procArticleId);
+				
 				ProceeedingPaperSubResult procPaperSubResult = new ProceeedingPaperSubResult(procArticleId);
 				
 				double procPaperScore = 0;
 
+				Iterator<Relationship> writtenRelations = author.getRelationships(RelationshipType.withName("written")).iterator();
 				while(writtenRelations.hasNext())
 				{
 					double authorPaperScore =  0;
@@ -72,6 +76,7 @@ public class GraphAnalyzer {
 					
 					for(Path path : allPaths)
 					{
+						System.out.println("Path Length: " + path.length());
 						double pathRWProbability = 1.0;
 						Iterable<Relationship> connections  = path.relationships();
 					
@@ -112,17 +117,26 @@ public class GraphAnalyzer {
 
 		dbService.shutdown();
 
-		return null;
+		return result;
 	}
 
 	private PathExpander<Object> createPathExpander()
 	{
 		PathExpander<Object> pathExpander = null;
 
-		PathExpanderBuilder pathExpanderBuilder = PathExpanderBuilder.empty();
-
+		PathExpanderBuilder pathExpanderBuilder = PathExpanderBuilder.allTypesAndDirections();
+		pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("published_at"));
+		pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("published_in"));
+		pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("written"));
+		
 		NodeFilter nodeFilter = new NodeFilter();
 		pathExpanderBuilder = pathExpanderBuilder.addNodeFilter(nodeFilter);
+//		pathExpanderBuilder = pathExpanderBuilder.addNodeFilter(nodeFilter);
+//		pathExpanderBuilder = pathExpanderBuilder.addNodeFilter(nodeFilter);
+//		pathExpanderBuilder = pathExpanderBuilder.addNodeFilter(nodeFilter);
+//		pathExpanderBuilder = pathExpanderBuilder.addNodeFilter(nodeFilter);
+//		pathExpanderBuilder = pathExpanderBuilder.addNodeFilter(nodeFilter);
+//		pathExpanderBuilder = pathExpanderBuilder.addNodeFilter(nodeFilter);
 
 		pathExpander = pathExpanderBuilder.build();
 
