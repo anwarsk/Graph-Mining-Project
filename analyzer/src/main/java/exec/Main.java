@@ -1,11 +1,15 @@
 package exec;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 
 import analyzer.GraphAnalyzer;
 import data.EvaluationInput;
 import db.csv.CSVAccessLayer;
+import processor.ResultProcessor;
+import result.Result;
 
 public class Main {
 
@@ -21,17 +25,23 @@ public class Main {
 		
 		
 		GraphAnalyzer analyzer = new GraphAnalyzer();
+		List<Result> results = new ArrayList<Result>();
 		
+		ResultProcessor resultProcessor = new ResultProcessor();
 		// Send the input to analyzer for analysis
 		Iterator<Entry<String, Integer>> inputIterator = evaluationInput.getIterator();
 		while(inputIterator.hasNext())
 		{
 			Entry<String, Integer> entry = inputIterator.next();
-			String authorId = entry.getKey();
-			int proceedingId = entry.getValue();
+			String authorId = "a_14078";//entry.getKey();
+			int proceedingId = 1289612; //entry.getValue();
 			
 			// find nodes between these ids
-			analyzer.generateResults(authorId, proceedingId);
+			Result result = analyzer.generateResults(authorId, proceedingId);
+			
+			resultProcessor.process(result);
+			results.add(result);
+			return;
 		}
 	}
 
