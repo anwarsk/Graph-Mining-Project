@@ -22,6 +22,14 @@ public class ProceeedingPaperSubResult implements Comparable<ProceeedingPaperSub
 		this.authorPaperSubResults.add(authorPaperSubResult);
 	}
 
+	public int getProceedingArticleId() {
+		return proceedingArticleId;
+	}
+
+	public double getScore() {
+		return score;
+	}
+
 	public int compareTo(ProceeedingPaperSubResult that) {
 		int result = 0;
 		if(this.score > that.score)
@@ -37,5 +45,10 @@ public class ProceeedingPaperSubResult implements Comparable<ProceeedingPaperSub
 
 	public void setScore(double procPaperScore) {
 		this.score = procPaperScore;
+	}
+
+	public AuthorPaperSubResult getTopRelatedAuthorPaperSubResult() {
+		// TODO Auto-generated method stub
+		return this.authorPaperSubResults.peekFirst();
 	}
 }
