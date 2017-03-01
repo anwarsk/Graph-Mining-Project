@@ -11,6 +11,15 @@ public class KeywordSubResult implements Comparable<KeywordSubResult>{
 		this.score = score;
 	}
 
+	public int getKeywordId() {
+		return keywordId;
+	}
+
+
+	public double getScore() {
+		return score;
+	}
+
 	public int compareTo(KeywordSubResult that) {
 		
 		int result = 0;
