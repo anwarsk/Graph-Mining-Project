@@ -33,7 +33,7 @@ public class Main {
 		while(inputIterator.hasNext())
 		{
 			Entry<String, Integer> entry = inputIterator.next();
-			String authorId = "a_14078";//entry.getKey();
+			String authorId = "a_14178";//entry.getKey();
 			int proceedingId = 1289612; //entry.getValue();
 			
 			// find nodes between these ids
