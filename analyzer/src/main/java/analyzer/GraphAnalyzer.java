@@ -17,6 +17,7 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.graphdb.factory.GraphDatabaseFactoryState;
 
 import result.AuthorPaperSubResult;
 import result.ProceeedingPaperSubResult;
@@ -25,16 +26,30 @@ import environment.Constant;
 
 public class GraphAnalyzer {
 
-	private String NEO_GRAPH_DB_PATH = Constant.NEO_GRAPH_DB_PATH;
+	private static String NEO_GRAPH_DB_PATH = Constant.NEO_GRAPH_DB_PATH;
 	private int MAX_TREE_DEPTH = Constant.MAX_PATH_DEPTH;
 
+	private static File databaseDirectory;
+	private static GraphDatabaseService dbService;
+	private static boolean isInitialized = false; 
+	
+	public static void intialize()
+	{
+		if(!isInitialized)
+		{
+			databaseDirectory = new File(NEO_GRAPH_DB_PATH);
+			dbService =  new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
+			isInitialized = true;
+		}
+
+	}
 	public Result generateResults(String authorId, int proceedingId)
 	{
 		assert authorId != null && authorId.isEmpty() == false : "Invalid Author Id";
 		assert proceedingId >0 : "Invalid Proceeding Id";
+
+		if(!isInitialized){intialize();}
 		
-		File databaseDirectory = new File(NEO_GRAPH_DB_PATH);
-		GraphDatabaseService dbService =  new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
 		Result result =  null;
 
 		try (Transaction tx=dbService.beginTx()) 
@@ -46,22 +61,22 @@ public class GraphAnalyzer {
 			Node proceeding = dbService.findNode(Label.label("proceeding"), "proc_id", proceedingId);
 			if(proceeding == null){ System.out.println("Can not find proceeding with id-" + proceedingId); return null;}
 
-			
+
 			Iterator<Relationship> publishedRelations = proceeding.getRelationships(RelationshipType.withName("published_at")).iterator();
 
 			PathExpander<Object> pathExpander = this.createPathExpander();
 			WeightCalculator weightCalculator = new WeightCalculator();
 
 			result = new Result(authorId, proceedingId);
-			
+
 			while(publishedRelations.hasNext())
 			{
 				Node procPaperNode = publishedRelations.next().getStartNode();
 				int procArticleId = (int)(long) procPaperNode.getProperty("article_id"); 
 				System.out.println("Running for Proceeding article_id" + procArticleId);
-				
+
 				ProceeedingPaperSubResult procPaperSubResult = new ProceeedingPaperSubResult(procArticleId);
-				
+
 				double procPaperScore = 0;
 
 				Iterator<Relationship> writtenRelations = author.getRelationships(RelationshipType.withName("written")).iterator();
@@ -69,24 +84,24 @@ public class GraphAnalyzer {
 				{
 					double authorPaperScore =  0;
 					Node authorPaperNode = writtenRelations.next().getEndNode();
-					
+
 					PathFinder<Path> allPathFinder = GraphAlgoFactory.allSimplePaths(pathExpander,MAX_TREE_DEPTH);
 					Iterable<Path> allPaths = allPathFinder.findAllPaths(authorPaperNode, procPaperNode);
 					Map<Integer, Double> keywordIdToScoreMap = new HashMap<Integer, Double>();
-					
+
 					for(Path path : allPaths)
 					{
-	//					System.out.println("Path Length: " + path.length());
+						//					System.out.println("Path Length: " + path.length());
 						double pathRWProbability = 1.0;
 						Iterable<Relationship> connections  = path.relationships();
-					
+
 						for(Relationship connection : connections)
 						{
 							double weight = weightCalculator.getWeightForRelation(connection);
 							pathRWProbability = pathRWProbability * weight;
 						}
 						authorPaperScore += pathRWProbability;
-						
+
 						Iterable<Node> nodes = path.nodes();
 						for(Node pathNode : nodes)
 						{
@@ -102,11 +117,11 @@ public class GraphAnalyzer {
 					int authorArticleId = (int) (long) authorPaperNode.getProperty("article_id"); 
 					AuthorPaperSubResult authorPaperSubResult = new AuthorPaperSubResult(authorArticleId, authorPaperScore);
 					authorPaperSubResult.addKeywords(keywordIdToScoreMap);
-					
+
 					procPaperSubResult.addAuthorPaperSubResult(authorPaperSubResult);
 					procPaperScore += authorPaperScore;
 				}
-				
+
 				procPaperSubResult.setScore(procPaperScore);
 				result.addProceedingPaperSubResult(procPaperSubResult);
 			}
@@ -114,8 +129,6 @@ public class GraphAnalyzer {
 			tx.success();
 			tx.close();
 		}
-
-		dbService.shutdown();
 
 		return result;
 	}
@@ -128,12 +141,16 @@ public class GraphAnalyzer {
 		pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("published_at"));
 		pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("published_in"));
 		pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("written"));
-		
+
 		NodeFilter nodeFilter = new NodeFilter();
 		pathExpanderBuilder = pathExpanderBuilder.addNodeFilter(nodeFilter);
 
 		pathExpander = pathExpanderBuilder.build();
 
 		return pathExpander;
+	}
+	
+	public static void shutdown(){
+		dbService.shutdown();
 	}
 }
