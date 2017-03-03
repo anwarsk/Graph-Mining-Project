@@ -1,6 +1,8 @@
 package result;
 
-public class KeywordSubResult implements Comparable<KeywordSubResult>{
+import java.io.Serializable;
+
+public class KeywordSubResult implements Serializable, Comparable<KeywordSubResult>{
 
 	
 	private int keywordId;
