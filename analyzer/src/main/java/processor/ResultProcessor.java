@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.Iterator;
 
+import environment.Constant;
 import result.AuthorPaperSubResult;
 import result.KeywordSubResult;
 import result.ProceeedingPaperSubResult;
@@ -13,7 +14,7 @@ import result.Result;
 
 public class ResultProcessor {
 
-	private final String RESULT_FILE_PATH = "D:/Test.csv";
+	private final String RESULT_FILE_PATH = Constant.EVALUATION_OUTPUT_FILE;
 	
 	public void process(Result result)
 	{
