@@ -1,11 +1,12 @@
 package result;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import com.google.common.collect.MinMaxPriorityQueue;
 
-public class AuthorPaperSubResult implements Comparable<AuthorPaperSubResult> {
+public class AuthorPaperSubResult implements Serializable, Comparable<AuthorPaperSubResult> {
 
 
 	private int authorArticleId;
