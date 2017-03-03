@@ -26,7 +26,7 @@ import environment.Constant;
 public class GraphAnalyzer {
 
 	private String NEO_GRAPH_DB_PATH = Constant.NEO_GRAPH_DB_PATH;
-	private int MAX_TREE_DEPTH = 6;//Constant.MAX_PATH_DEPTH;
+	private int MAX_TREE_DEPTH = Constant.MAX_PATH_DEPTH;
 
 	public Result generateResults(String authorId, int proceedingId)
 	{
@@ -76,7 +76,7 @@ public class GraphAnalyzer {
 					
 					for(Path path : allPaths)
 					{
-						System.out.println("Path Length: " + path.length());
+	//					System.out.println("Path Length: " + path.length());
 						double pathRWProbability = 1.0;
 						Iterable<Relationship> connections  = path.relationships();
 					
@@ -131,12 +131,6 @@ public class GraphAnalyzer {
 		
 		NodeFilter nodeFilter = new NodeFilter();
 		pathExpanderBuilder = pathExpanderBuilder.addNodeFilter(nodeFilter);
-//		pathExpanderBuilder = pathExpanderBuilder.addNodeFilter(nodeFilter);
-//		pathExpanderBuilder = pathExpanderBuilder.addNodeFilter(nodeFilter);
-//		pathExpanderBuilder = pathExpanderBuilder.addNodeFilter(nodeFilter);
-//		pathExpanderBuilder = pathExpanderBuilder.addNodeFilter(nodeFilter);
-//		pathExpanderBuilder = pathExpanderBuilder.addNodeFilter(nodeFilter);
-//		pathExpanderBuilder = pathExpanderBuilder.addNodeFilter(nodeFilter);
 
 		pathExpander = pathExpanderBuilder.build();
 
