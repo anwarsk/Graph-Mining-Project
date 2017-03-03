@@ -27,7 +27,7 @@ public class Main {
 
 
 		GraphAnalyzer analyzer = new GraphAnalyzer();
-		List<Result> results = new ArrayList<Result>();
+		//List<Result> results = new ArrayList<Result>();
 
 		ResultProcessor resultProcessor = new ResultProcessor();
 		ResultSerializer resultSerializer = new ResultSerializer();
