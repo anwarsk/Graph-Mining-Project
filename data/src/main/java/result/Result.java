@@ -1,16 +1,11 @@
 package result;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.PriorityQueue;
-
-import org.apache.commons.collections4.map.MultiValueMap;
 
 import com.google.common.collect.MinMaxPriorityQueue;
 
-public class Result implements Serializable{
+public class Result {
 	
 	private String authorId;
 	private int proceedingId;
