@@ -43,6 +43,18 @@ public class Main {
 //		MultiValueMap<Integer, Integer> a = new MultiValueMap<>();
 //		a.put(1,2); a.put(10, 20); a.put(1, 2);
 //		System.out.println(a);
+		
+		putWeightsOnRelationships();
+		
+	}
+
+
+	private static void putWeightsOnRelationships() {
+		Neo4jAccessLayer neo4jAccessLayer = new Neo4jAccessLayer();
+		neo4jAccessLayer.setWeightsOnPaperNodes();		
+		
+		//neo4jAccessLayer.setWeightsOnContainsRelations();
+		
 	}
 
 
