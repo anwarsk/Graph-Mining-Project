@@ -1,5 +1,6 @@
 package analyzer;
 
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -64,7 +65,7 @@ public class GraphAnalyzer {
 
 			Iterator<Relationship> publishedRelations = proceeding.getRelationships(RelationshipType.withName("published_at")).iterator();
 
-			PathExpander<Object> pathExpander = this.createPathExpander();
+			
 			WeightCalculator weightCalculator = new WeightCalculator();
 
 			result = new Result(authorId, proceedingId);
@@ -84,27 +85,32 @@ public class GraphAnalyzer {
 				{
 					double authorPaperScore =  0;
 					Node authorPaperNode = writtenRelations.next().getEndNode();
-
-					PathFinder<Path> allPathFinder = GraphAlgoFactory.allSimplePaths(pathExpander,MAX_TREE_DEPTH);
-					Iterable<Path> allPaths = allPathFinder.findAllPaths(authorPaperNode, procPaperNode);
+					PathExpander<Object> pathExpander = this.createPathExpander();
+					PathFinder<Path> allPathFinder = GraphAlgoFactory.allSimplePaths(pathExpander, MAX_TREE_DEPTH);
+					Iterator<Path> allPaths = allPathFinder.findAllPaths(authorPaperNode, procPaperNode).iterator();
+					
 					Map<Integer, Double> keywordIdToScoreMap = new HashMap<Integer, Double>();
 
-					for(Path path : allPaths)
+					while(allPaths.hasNext())
 					{
+						Path path = allPaths.next();
+						System.out.println("Processing Path: " + path.toString());
 						//					System.out.println("Path Length: " + path.length());
 						double pathRWProbability = 1.0;
-						Iterable<Relationship> connections  = path.relationships();
+						Iterator<Relationship> connections  = path.relationships().iterator();
 
-						for(Relationship connection : connections)
+						while(connections.hasNext())
 						{
+							Relationship connection = connections.next();
 							double weight = weightCalculator.getWeightForRelation(connection);
 							pathRWProbability = pathRWProbability * weight;
 						}
 						authorPaperScore += pathRWProbability;
 
-						Iterable<Node> nodes = path.nodes();
-						for(Node pathNode : nodes)
+						Iterator<Node> nodes = path.nodes().iterator();
+						while(nodes.hasNext())
 						{
+							Node pathNode = nodes.next();
 							if(pathNode.hasLabel(Label.label("keyword")))
 							{
 								int keywordId = (int) pathNode.getProperty("keyword_id");
@@ -112,6 +118,7 @@ public class GraphAnalyzer {
 								keywordIdToScoreMap.put(keywordId, currentKeywordScore + pathRWProbability);
 							}
 						}
+						
 					}
 					// Create AuthorPaperSubResult
 					int authorArticleId = (int) (long) authorPaperNode.getProperty("article_id"); 
