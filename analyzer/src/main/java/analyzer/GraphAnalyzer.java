@@ -18,12 +18,11 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.graphdb.factory.GraphDatabaseFactoryState;
 
+import environment.Constant;
 import result.AuthorPaperSubResult;
 import result.ProceeedingPaperSubResult;
 import result.Result;
-import environment.Constant;
 
 public class GraphAnalyzer {
 
@@ -33,7 +32,7 @@ public class GraphAnalyzer {
 	private static File databaseDirectory;
 	private static GraphDatabaseService dbService;
 	private static boolean isInitialized = false; 
-	
+
 	public static void intialize()
 	{
 		if(!isInitialized)
@@ -50,7 +49,7 @@ public class GraphAnalyzer {
 		assert proceedingId >0 : "Invalid Proceeding Id";
 
 		if(!isInitialized){intialize();}
-		
+
 		Result result =  null;
 
 		try (Transaction tx=dbService.beginTx()) 
@@ -65,7 +64,7 @@ public class GraphAnalyzer {
 
 			Iterator<Relationship> publishedRelations = proceeding.getRelationships(RelationshipType.withName("published_at")).iterator();
 
-			
+
 			WeightCalculator weightCalculator = new WeightCalculator();
 
 			result = new Result(authorId, proceedingId);
@@ -85,41 +84,54 @@ public class GraphAnalyzer {
 				{
 					double authorPaperScore =  0;
 					Node authorPaperNode = writtenRelations.next().getEndNode();
-					PathExpander<Object> pathExpander = this.createPathExpander();
-					PathFinder<Path> allPathFinder = GraphAlgoFactory.allSimplePaths(pathExpander, MAX_TREE_DEPTH);
-					Iterator<Path> allPaths = allPathFinder.findAllPaths(authorPaperNode, procPaperNode).iterator();
-					
+					long numberOfPathTraversed = 0;
+					int currentDepth = Constant.START_PATH_DEPTH;
 					Map<Integer, Double> keywordIdToScoreMap = new HashMap<Integer, Double>();
-
-					while(allPaths.hasNext())
+					do
 					{
-						Path path = allPaths.next();
-						System.out.println("Processing Path: " + path.toString());
-						//					System.out.println("Path Length: " + path.length());
-						double pathRWProbability = 1.0;
-						Iterator<Relationship> connections  = path.relationships().iterator();
+						System.out.println("Current Path Length: " + currentDepth);
+						System.out.println("Current Path Count: " + numberOfPathTraversed);
+						
+						PathExpander<Object> pathExpander = this.createPathExpander();
+						PathFinder<Path> allPathFinder = GraphAlgoFactory.pathsWithLength(pathExpander, currentDepth);
+						Iterator<Path> allPaths = allPathFinder.findAllPaths(authorPaperNode, procPaperNode).iterator();
 
-						while(connections.hasNext())
+						while(allPaths.hasNext())
 						{
-							Relationship connection = connections.next();
-							double weight = weightCalculator.getWeightForRelation(connection);
-							pathRWProbability = pathRWProbability * weight;
-						}
-						authorPaperScore += pathRWProbability;
+							Path path = allPaths.next();
+							//System.out.println("Processing Path: " + path.toString());
+							//					System.out.println("Path Length: " + path.length());
+							double pathRWProbability = 1.0;
+							Iterator<Relationship> connections  = path.relationships().iterator();
 
-						Iterator<Node> nodes = path.nodes().iterator();
-						while(nodes.hasNext())
-						{
-							Node pathNode = nodes.next();
-							if(pathNode.hasLabel(Label.label("keyword")))
+							while(connections.hasNext())
 							{
-								int keywordId = (int) pathNode.getProperty("keyword_id");
-								double currentKeywordScore = keywordIdToScoreMap.getOrDefault(keywordId, 0.0);
-								keywordIdToScoreMap.put(keywordId, currentKeywordScore + pathRWProbability);
+								Relationship connection = connections.next();
+								double weight = weightCalculator.getWeightForRelation(connection);
+								pathRWProbability = pathRWProbability * weight;
 							}
+							authorPaperScore += pathRWProbability;
+
+							Iterator<Node> nodes = path.nodes().iterator();
+							while(nodes.hasNext())
+							{
+								Node pathNode = nodes.next();
+								if(pathNode.hasLabel(Label.label("keyword")))
+								{
+									int keywordId = (int) pathNode.getProperty("keyword_id");
+									double currentKeywordScore = keywordIdToScoreMap.getOrDefault(keywordId, 0.0);
+									keywordIdToScoreMap.put(keywordId, currentKeywordScore + pathRWProbability);
+								}
+							}
+							
+							numberOfPathTraversed++;
+							if(numberOfPathTraversed > Constant.MAX_PATHS){break;}
 						}
 						
-					}
+						if(numberOfPathTraversed < Constant.MAX_PATHS){currentDepth++;}
+						
+					}while(numberOfPathTraversed < Constant.MAX_PATHS && currentDepth < Constant.MAX_PATH_DEPTH);
+
 					// Create AuthorPaperSubResult
 					int authorArticleId = (int) (long) authorPaperNode.getProperty("article_id"); 
 					AuthorPaperSubResult authorPaperSubResult = new AuthorPaperSubResult(authorArticleId, authorPaperScore);
@@ -156,7 +168,7 @@ public class GraphAnalyzer {
 
 		return pathExpander;
 	}
-	
+
 	public static void shutdown(){
 		dbService.shutdown();
 	}
