@@ -479,7 +479,7 @@ public class Neo4jAccessLayer {
 		GraphDatabaseService dbService = new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
 		try (Transaction tx=dbService.beginTx()) 
 		{
-			
+
 			ResourceIterator<Node> paperNodes = dbService.findNodes(Label.label("paper"));
 			while(paperNodes.hasNext())
 			{
@@ -499,12 +499,12 @@ public class Neo4jAccessLayer {
 	}
 
 	public void setWeightsOnContainsRelations() {
-		
+
 		File databaseDirectory = new File(DB_PATH);
 		GraphDatabaseService dbService = new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
 		try (Transaction tx=dbService.beginTx()) 
 		{
-			
+
 			ResourceIterator<Node> keywordNodes = dbService.findNodes(Label.label("keyword"));
 			while(keywordNodes.hasNext())
 			{
@@ -521,6 +521,30 @@ public class Neo4jAccessLayer {
 		}
 
 		dbService.shutdown();
-		
+
+	}
+
+	public void setWeightsOnCiteRelations() {
+		File databaseDirectory = new File(DB_PATH);
+		GraphDatabaseService dbService = new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
+		try (Transaction tx=dbService.beginTx()) 
+		{
+
+			ResourceIterator<Node> paperNodes = dbService.findNodes(Label.label("paper"));
+			while(paperNodes.hasNext())
+			{
+				Node paperNode = paperNodes.next();
+				Iterable<Relationship> citeRelations = paperNode.getRelationships(RelationshipType.withName("cite"), Direction.INCOMING);
+				double weight = 1.00/paperNode.getDegree(RelationshipType.withName("cite"), Direction.INCOMING);
+				for(Relationship citeRelation : citeRelations)
+				{
+					citeRelation.setProperty("b_weight", weight);
+				}
+			}
+			tx.success();
+			tx.close();
+		}
+
+		dbService.shutdown();
 	}
 }
