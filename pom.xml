@@ -13,5 +13,6 @@
 		<module>graphbuilder</module>
 		<module>analyzer</module>
 		<module>summarizer</module>
+		<module>evaluator</module>
 	</modules>
 </project>
