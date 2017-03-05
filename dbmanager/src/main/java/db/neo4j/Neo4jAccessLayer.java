@@ -4,11 +4,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -263,7 +265,7 @@ public class Neo4jAccessLayer {
 	}
 
 	public void createPaperReferenceRelation(PaperReferenceRelationStore paperAndReferenceRelationStore) {
-		
+
 		assert paperAndReferenceRelationStore != null : "Null Keyword Paper Relation Stores";
 
 		System.out.println("SIZE>=" + paperAndReferenceRelationStore.size());
@@ -311,7 +313,7 @@ public class Neo4jAccessLayer {
 		while(startIndex < articleIds.size());
 		dbService.shutdown();
 		System.out.println("Checkout: Database Shutdown");
-		
+
 	}
 
 	public void createProceedingNodes(List<Proceeding> proceedingList) {
@@ -320,7 +322,7 @@ public class Neo4jAccessLayer {
 		File databaseDirectory = new File(DB_PATH);
 		GraphDatabaseService dbService = new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
 
-		
+
 		try (Transaction tx=dbService.beginTx()) 
 		{
 			for(Proceeding proceeding: proceedingList)
@@ -387,18 +389,18 @@ public class Neo4jAccessLayer {
 		while(startIndex < proceedingIds.size());
 		dbService.shutdown();
 		System.out.println("Checkout: Database Shutdown");
-		
+
 	}
 
 	public void addJournalNodes(List<Journal> journalList) {
-		
+
 		assert journalList != null : "Null Journal List";
 		assert journalList.isEmpty() == false : "Empty Proceeding List";
 
 		File databaseDirectory = new File(DB_PATH);
 		GraphDatabaseService dbService = new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
 
-		
+
 		try (Transaction tx=dbService.beginTx()) 
 		{
 			for(Journal journal: journalList)
@@ -419,7 +421,7 @@ public class Neo4jAccessLayer {
 	}
 
 	public void createJournalAndPaperRelation(JournalPaperRelationStore journalAndPaperRelationStore) {
-		
+
 		assert journalAndPaperRelationStore != null : "Null Journal and Paper Relation Store";
 		assert journalAndPaperRelationStore.size() > 0 : "Empty Journal and Paper Relation Store";	
 
@@ -468,6 +470,31 @@ public class Neo4jAccessLayer {
 		while(startIndex < JournalUIds.size());
 		dbService.shutdown();
 		System.out.println("Checkout: Database Shutdown");
-		
+
+	}
+
+	public void setWeightsOnPaperNodes() {
+		// TODO Auto-generated method stub
+		File databaseDirectory = new File(DB_PATH);
+		GraphDatabaseService dbService = new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
+		try (Transaction tx=dbService.beginTx()) 
+		{
+			
+			ResourceIterator<Node> paperNodes = dbService.findNodes(Label.label("paper"));
+			while(paperNodes.hasNext())
+			{
+				Node paperNode = paperNodes.next();
+				Iterable<Relationship> writtenRelations = paperNode.getRelationships(RelationshipType.withName("written"), Direction.INCOMING);
+				double weight = 1.00/paperNode.getDegree(RelationshipType.withName("written"), Direction.INCOMING);
+				for(Relationship writtenRelation : writtenRelations)
+				{
+					writtenRelation.setProperty("b_weight", weight);
+				}
+			}
+			tx.success();
+			tx.close();
+		}
+
+		dbService.shutdown();
 	}
 }
