@@ -53,7 +53,9 @@ public class Main {
 		Neo4jAccessLayer neo4jAccessLayer = new Neo4jAccessLayer();
 		//neo4jAccessLayer.setWeightsOnPaperNodes();		
 		
-		neo4jAccessLayer.setWeightsOnContainsRelations();
+		//neo4jAccessLayer.setWeightsOnContainsRelations();
+		
+		neo4jAccessLayer.setWeightsOnCiteRelations();
 		
 	}
 
