@@ -51,9 +51,9 @@ public class Main {
 
 	private static void putWeightsOnRelationships() {
 		Neo4jAccessLayer neo4jAccessLayer = new Neo4jAccessLayer();
-		neo4jAccessLayer.setWeightsOnPaperNodes();		
+		//neo4jAccessLayer.setWeightsOnPaperNodes();		
 		
-		//neo4jAccessLayer.setWeightsOnContainsRelations();
+		neo4jAccessLayer.setWeightsOnContainsRelations();
 		
 	}
 
