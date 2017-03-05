@@ -44,7 +44,7 @@ public class Main {
 //		a.put(1,2); a.put(10, 20); a.put(1, 2);
 //		System.out.println(a);
 		
-		putWeightsOnRelationships();
+	//	putWeightsOnRelationships();
 		
 	}
 
@@ -55,7 +55,7 @@ public class Main {
 		
 		//neo4jAccessLayer.setWeightsOnContainsRelations();
 		
-		neo4jAccessLayer.setWeightsOnCiteRelations();
+		//neo4jAccessLayer.setWeightsOnCiteRelations();
 		
 	}
 
