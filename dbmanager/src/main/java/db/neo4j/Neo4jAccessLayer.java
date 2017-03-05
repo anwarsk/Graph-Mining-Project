@@ -497,4 +497,30 @@ public class Neo4jAccessLayer {
 
 		dbService.shutdown();
 	}
+
+	public void setWeightsOnContainsRelations() {
+		
+		File databaseDirectory = new File(DB_PATH);
+		GraphDatabaseService dbService = new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
+		try (Transaction tx=dbService.beginTx()) 
+		{
+			
+			ResourceIterator<Node> keywordNodes = dbService.findNodes(Label.label("keyword"));
+			while(keywordNodes.hasNext())
+			{
+				Node keywordNode = keywordNodes.next();
+				Iterable<Relationship> containsRelations = keywordNode.getRelationships(RelationshipType.withName("contains"), Direction.INCOMING);
+				double weight = 1.00/keywordNode.getDegree(RelationshipType.withName("contains"), Direction.INCOMING);
+				for(Relationship containsRelation : containsRelations)
+				{
+					containsRelation.setProperty("b_weight", weight);
+				}
+			}
+			tx.success();
+			tx.close();
+		}
+
+		dbService.shutdown();
+		
+	}
 }
