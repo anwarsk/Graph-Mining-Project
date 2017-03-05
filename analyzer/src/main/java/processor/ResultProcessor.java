@@ -14,7 +14,8 @@ import result.Result;
 
 public class ResultProcessor {
 
-	private final String RESULT_FILE_PATH = Constant.EVALUATION_OUTPUT_FILE;
+	private static final String RESULT_FILE_PATH = Constant.EVALUATION_OUTPUT_FILE;
+	private static boolean isInitialized = false;
 	
 	public void process(Result result)
 	{
@@ -58,13 +59,30 @@ public class ResultProcessor {
 		}
 	}
 	
+	private static void intialize()
+	{
+		try 
+		{
+			String headerString = "author_id,proc_id,reco_article_id,score,related_article_id,keywords";
+			PrintWriter writer;
+			writer = new PrintWriter(new FileOutputStream(new File(RESULT_FILE_PATH)));
+			writer.println(headerString);
+			writer.flush();
+			writer.close();
+			isInitialized = true;
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	private void writeToResultFile(String resultString)
 	{
 		
 		try 
 		{
+			if(isInitialized == false) {intialize();}
 			PrintWriter writer;
-			writer = new PrintWriter(new FileOutputStream(new File(this.RESULT_FILE_PATH), true));
+			writer = new PrintWriter(new FileOutputStream(new File(RESULT_FILE_PATH), true));
 			writer.println(resultString);
 			writer.flush();
 			writer.close();
