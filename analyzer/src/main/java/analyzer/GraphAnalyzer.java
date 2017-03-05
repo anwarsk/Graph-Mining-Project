@@ -74,7 +74,8 @@ public class GraphAnalyzer {
 				Node procPaperNode = publishedRelations.next().getStartNode();
 				int procArticleId = (int)(long) procPaperNode.getProperty("article_id"); 
 				System.out.println("Running for Proceeding article_id" + procArticleId);
-
+				long cutOffDate = (long)procPaperNode.getProperty("publication_date");
+				
 				ProceeedingPaperSubResult procPaperSubResult = new ProceeedingPaperSubResult(procArticleId);
 
 				double procPaperScore = 0;
@@ -89,28 +90,36 @@ public class GraphAnalyzer {
 					Map<Integer, Double> keywordIdToScoreMap = new HashMap<Integer, Double>();
 					do
 					{
-						System.out.println("Current Path Length: " + currentDepth);
-						System.out.println("Current Path Count: " + numberOfPathTraversed);
+//						System.out.println("Current Path Length: " + currentDepth);
+//						System.out.println("Current Path Count: " + numberOfPathTraversed);
 						
-						PathExpander<Object> pathExpander = this.createPathExpander();
+						//long testCutOffDate = Long.MIN_VALUE;
+						PathExpander<Object> pathExpander = this.createPathExpander(cutOffDate, authorPaperNode.getId(), procPaperNode.getId());
+						
 						PathFinder<Path> allPathFinder = GraphAlgoFactory.pathsWithLength(pathExpander, currentDepth);
 						Iterator<Path> allPaths = allPathFinder.findAllPaths(authorPaperNode, procPaperNode).iterator();
-
+						
 						while(allPaths.hasNext())
 						{
 							Path path = allPaths.next();
-							//System.out.println("Processing Path: " + path.toString());
-							//					System.out.println("Path Length: " + path.length());
+//							System.out.println("Processing Path: " + path.toString());
+//							System.out.println("Path Length: " + path.length());
 							double pathRWProbability = 1.0;
 							Iterator<Relationship> connections  = path.relationships().iterator();
 
-							while(connections.hasNext())
+							while(connections.hasNext() && (pathRWProbability > Constant.RANDON_WALK_PROB_CUTOFF))
 							{
 								Relationship connection = connections.next();
 								double weight = weightCalculator.getWeightForRelation(connection);
 								pathRWProbability = pathRWProbability * weight;
 							}
-							authorPaperScore += pathRWProbability;
+							
+							if(pathRWProbability < Constant.RANDON_WALK_PROB_CUTOFF){ 
+								System.out.println("Terminated with: " + pathRWProbability); 
+								continue;	
+								}
+							
+							authorPaperScore += pathRWProbability/path.length();
 
 							Iterator<Node> nodes = path.nodes().iterator();
 							while(nodes.hasNext())
@@ -152,7 +161,7 @@ public class GraphAnalyzer {
 		return result;
 	}
 
-	private PathExpander<Object> createPathExpander()
+	private PathExpander<Object> createPathExpander(long cutOffDate, long startNodeId, long endNodeId)
 	{
 		PathExpander<Object> pathExpander = null;
 
@@ -160,8 +169,9 @@ public class GraphAnalyzer {
 		pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("published_at"));
 		pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("published_in"));
 		pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("written"));
+		//pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("cite"));
 
-		NodeFilter nodeFilter = new NodeFilter();
+		NodeFilter nodeFilter = new NodeFilter(cutOffDate, startNodeId, endNodeId);
 		pathExpanderBuilder = pathExpanderBuilder.addNodeFilter(nodeFilter);
 
 		pathExpander = pathExpanderBuilder.build();
