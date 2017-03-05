@@ -21,6 +21,9 @@ public class ResultSerializer {
 			String resultJsonFilePath = Constant.JSON_OUTPUT_DIRECTORY + "/" + resultJsonFileName; 
 			PrintWriter fileWriter = new PrintWriter(new File(resultJsonFilePath));
 			fileWriter.write(json);
+			
+			fileWriter.flush();
+			fileWriter.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
