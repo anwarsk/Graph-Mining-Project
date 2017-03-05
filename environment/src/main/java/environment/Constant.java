@@ -19,6 +19,6 @@ public class Constant {
 	public static final String EVALUATION_OUTPUT_FILE = "/home/anwar/project/output/results.csv";
 	
 	public static final int START_PATH_DEPTH = 2;
-	public static final long MAX_PATHS = 10000;
+	public static final long MAX_PATHS = 1000000;
 	public static final int MAX_PATH_DEPTH = 6;
 }
