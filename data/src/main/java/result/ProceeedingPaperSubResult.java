@@ -1,11 +1,10 @@
 package result;
 
-import java.io.Serializable;
 import java.util.Collections;
 
 import com.google.common.collect.MinMaxPriorityQueue;
 
-public class ProceeedingPaperSubResult implements Serializable, Comparable<ProceeedingPaperSubResult> {
+public class ProceeedingPaperSubResult implements Comparable<ProceeedingPaperSubResult> {
 
 	private int proceedingArticleId;
 	private double score;
