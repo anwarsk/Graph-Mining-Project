@@ -35,7 +35,7 @@ public class NodeFilter implements Predicate<Node>{
 				isNodeMatch = true;
 			}
 		}
-		else if(testNode.hasLabel(Label.label("author")) | testNode.hasLabel(Label.label("keyword")))
+		else
 		{
 			isNodeMatch = true;
 		}
