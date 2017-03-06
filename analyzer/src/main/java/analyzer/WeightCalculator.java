@@ -11,23 +11,24 @@ public class WeightCalculator {
 		assert relation != null : "Null Relation";
 		
 		double weight = 1;
+		weight = (Double) relation.getProperty("b_weight");
 		
-		if(relation.getType().name().compareToIgnoreCase("cite") == 0)
-		{
-				weight = (Double) relation.getProperty("b_weight");
-		}
-		else if(relation.getType().name().compareToIgnoreCase("contains") == 0)
-		{
-				weight = (Double) relation.getProperty("b_weight");
-		}
-		else if(relation.getType().name().compareToIgnoreCase("written") == 0)
-		{
-				weight = (Double) relation.getProperty("b_weight");
-		}
-		else
-		{
-			throw new IllegalStateException();
-		}
+//		if(relation.getType().name().compareToIgnoreCase("cite") == 0)
+//		{
+//				weight = (Double) relation.getProperty("b_weight");
+//		}
+//		else if(relation.getType().name().compareToIgnoreCase("contains") == 0)
+//		{
+//				weight = (Double) relation.getProperty("b_weight");
+//		}
+//		else if(relation.getType().name().compareToIgnoreCase("written") == 0)
+//		{
+//				weight = (Double) relation.getProperty("b_weight");
+//		}
+//		else
+//		{
+//			throw new IllegalStateException();
+//		}
 			
 		return weight;
 	}
