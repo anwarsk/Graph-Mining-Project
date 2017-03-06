@@ -115,7 +115,7 @@ public class GraphAnalyzer {
 							}
 							
 							if(pathRWProbability < Constant.RANDON_WALK_PROB_CUTOFF){ 
-								System.out.println("Terminated with: " + pathRWProbability); 
+//								System.out.println("Terminated with: " + pathRWProbability); 
 								continue;	
 								}
 							
@@ -166,9 +166,9 @@ public class GraphAnalyzer {
 		PathExpander<Object> pathExpander = null;
 
 		PathExpanderBuilder pathExpanderBuilder = PathExpanderBuilder.allTypesAndDirections();
-		pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("published_at"));
-		pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("published_in"));
-		pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("written"));
+		//pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("published_at"));
+		//pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("published_in"));
+		//pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("written"));
 		//pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("cite"));
 
 		NodeFilter nodeFilter = new NodeFilter(cutOffDate, startNodeId, endNodeId);
