@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="analyzer" />
+        <module name="data" />
+        <module name="dbmanager" />
+        <module name="environment" />
+        <module name="evaluator" />
+        <module name="graphbuilder" />
+        <module name="summarizer" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="analyzer" target="1.5" />
+      <module name="data" target="1.5" />
+      <module name="dbmanager" target="1.5" />
+      <module name="environment" target="1.5" />
+      <module name="evaluator" target="1.5" />
+      <module name="graphbuilder" target="1.5" />
+      <module name="graphminer" target="1.5" />
+      <module name="summarizer" target="1.5" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

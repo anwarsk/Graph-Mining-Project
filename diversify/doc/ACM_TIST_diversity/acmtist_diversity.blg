@@ -1,0 +1,54 @@
+This is BibTeX, Version 0.99c (Web2C 7.5.4)
+The top-level auxiliary file: acmtist_diversity.aux
+The style file: acmsmall.bst
+Database file #1: reference.bib
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Warning--empty address in carbonell98MMR
+Warning--empty address in chen06Less
+Warning--empty address in Gonzalez:Handbook2007
+Warning--empty address in salton83Introduction
+Warning--empty publisher in mrr
+Warning--empty address in mrr
+Warning--empty address in zhai03Beyond
+You've used 25 entries,
+            3177 wiz_defined-function locations,
+            893 strings with 11001 characters,
+and the built_in function-call counts, 19042 in all, are:
+= -- 1890
+> -- 912
+< -- 0
++ -- 264
+- -- 357
+* -- 1606
+:= -- 2982
+add.period$ -- 125
+call.type$ -- 25
+change.case$ -- 186
+chr.to.int$ -- 24
+cite$ -- 32
+duplicate$ -- 697
+empty$ -- 1404
+format.name$ -- 502
+if$ -- 3952
+int.to.chr$ -- 2
+int.to.str$ -- 0
+missing$ -- 45
+newline$ -- 128
+num.names$ -- 248
+pop$ -- 204
+preamble$ -- 1
+purify$ -- 336
+quote$ -- 0
+skip$ -- 653
+stack$ -- 0
+substring$ -- 1121
+swap$ -- 252
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 476
+warning$ -- 7
+while$ -- 230
+width$ -- 0
+write$ -- 381
+(There were 7 warnings)

@@ -1,0 +1,63 @@
+\section{Direct Derivation for Expected 2-call@k}
+
+\label{appendix.2call}
+
+The following derivation serves as a specific example to help understanding the derivation of optimizing expected $n$-call@$k$ for general $n \geq 1$. This is a straightforward extension to optimizing expected 1-call@$k$, utilizing a similar derivational approach based on a logical expansion of the optimization objective:
+\begin{align*}
+  s_k^* & = \argmax_{s_k} \mathbb{E} \!\left[ R_k \geq 2 \left| S_{k-1}^*, s_k, \vec{q} \right.\right] \\
+%%  
+  & = \argmax_{s_k} \mathbb{E} \!\Bigg[ (r_1=1 \wedge r_2=1) \vee (r_1=0 \wedge r_2=1 \wedge r_3=1) \vee (r_1=1 \wedge r_2=0 \wedge r_3=1) \,\vee \\
+  & \hspace{21.7mm} (r_1=0 \wedge r_2=0 \wedge r_3=1 \wedge r_4=1) \vee (r_1=0 \wedge r_2=1 \wedge r_3=0 \wedge r_4=1) \,\vee \\
+  & \hspace{21.7mm} (r_1=1 \wedge r_2=0 \wedge r_3=0 \wedge r_4=1) \vee \dots \vee \\
+  & \hspace{21.7mm} (r_1=0 \wedge \dots \wedge r_{k-2}=0 \wedge r_{k-1}=1 \wedge r_k=1) \,\vee \\
+  & \hspace{21.7mm} (r_1=0 \wedge \dots \wedge r_{k-3}=0 \wedge r_{k-2}=1 \wedge r_{k-1} = 0 \wedge r_k=1) \vee \dots \vee \\
+  & \hspace{21.7mm} (r_1=1 \wedge r_2=0 \wedge \dots \wedge r_{k-1}=0 \wedge r_k=1) \Bigg| S_{k-1}^*, s_k, \vec{q} \,\Bigg] \\
+%%  
+\end{align*}
+
+Next we reorganize our formula to isolate those terms mentioning $r_k$:
+\begin{align*}
+ s_k^* & = \argmax_{s_k} \mathbb{E} \!\Bigg[ (r_1=1 \wedge r_2=1) \vee (r_1=0 \wedge r_2=1 \wedge r_3=1) \vee (r_1=1 \wedge r_2=0 \wedge r_3=1) \,\vee \\
+  & \hspace{21.7mm} (r_1=0 \wedge r_2=0 \wedge r_3=1 \wedge r_4=1) \vee (r_1=0 \wedge r_2=1 \wedge r_3=0 \wedge r_4=1) \,\vee \\
+  & \hspace{21.7mm} (r_1=1 \wedge r_2=0 \wedge r_3=0 \wedge r_4=1) \vee \dots \vee \\
+  & \hspace{21.7mm} \left.\left. \bigvee_{j=1}^{k-1} \left( r_k=1 \wedge \bigwedge_{\substack{i=1 \\ i \neq j}}^{k-1} r_i=0 \wedge r_j=1 \right) \right| S_{k-1}^*, s_k, \vec{q} \,\right]
+\end{align*}
+
+Now we rewrite disjoint events as a sum of probabilities, ignoring constant probabilities independent of $r_k$ that do not change the $\argmax_{s_k}$ results:
+\begin{align*}
+ s_k^* & = \argmax_{s_k} \sum_{j=1}^{k-1} P \!\!\left(\left. r_k=1 \wedge \bigwedge_{\substack{i=1 \\ i \neq j}}^{k-1} r_i=0 \wedge r_j=1 \right| S_{k-1}^*, s_k, \vec{q} \,\right)
+\end{align*}
+
+Next we formally evaluate the above query w.r.t.\ our latent subtopic binary relevance model in Figure~\ref{fig:gm} and simplify:
+\begin{align*}
+ s_k^* & = \argmax_{s_k} \sum_{j=1}^{k-1} \left( \sum_{t_1, \dots, t_k, t} P(t|\vec{q}) \, P(t_k|s_k) \mathbb{I} [t_k=t] \, P(t_j|s_j^*) \mathbb{I} [t_j=t] \prod_{\substack{i=1 \\ i \neq j}}^{k-1} P(t_i|s_i^*) \mathbb{I} [t_i \neq t] \right) \\
+  & = \argmax_{s_k} \sum_t P(t|\vec{q}) \, P(t_k=t|s_k) \sum_{j=1}^{k-1} \left( P(t_j=t|s_j^*) \prod_{\substack{i=1 \\ i \neq j}}^{k-1} \left( 1 - P \! \left( t_i=t|s_i^* \right) \right) \right)
+\end{align*}
+
+Assuming that $\forall i \; P(t_i|s_i) \in \{0,1\}$ and $P(t|\vec{q}) \in \{0,1\}$, the objective becomes:
+\begin{align}
+  s_k^* & = \argmax_{s_k} \sum_t P(t|\vec{q}) \, P(t_k = t | s_k) \sum_{j=1}^{k-1} \left( P(t_j=t|s_j^*) \prod_{\substack{i=1 \\ i \neq j}}^{k-1} \left( 1 - P \! \left( t_i=t|s_i^* \right) \right) \right) \nonumber
+\end{align}
+
+Exploiting the same inversion idea used to replace $\Box$ in~\eqref{eq:partial_simp}:
+\begin{align}
+  s_k^* & = \argmax_{s_k} \sum_t P(t|\vec{q}) \, P(t_k = t | s_k) \sum_{j=1}^{k-1} \left( \!\! P(t_j=t|s_j^*) \! \left[ 1 - \left( \! 1 - \prod_{\substack{i=1 \\ i \neq j}}^{k-1} \left( 1 - P \! \left( t_i=t|s_i^* \right) \right) \!\! \right) \right] \right) \nonumber
+\end{align}
+
+Distributing $P(t_j=t|s_j^*)$, the relevance and diversity components begin to emerge:
+\begin{align}
+ s_k^* & = \argmax_{s_k} \sum_t P(t|\vec{q}) \, P(t_k = t | s_k) \nonumber \\
+  & \hspace{30mm} \sum_{j=1}^{k-1} \left[ P \! \left( t_j=t|s_j^* \right) - P \! \left( t_j=t|s_j^* \right) \left( 1 - \prod_{\substack{i=1 \\ i \neq j}}^{k-1} \left( 1 - P \! \left( t_i=t|s_i^* \right) \right) \right) \right] \nonumber
+\end{align}
+
+Finally, making the deterministic subtopic probability assumption that $P(t_k = t | s_k) \in \{ 0,1 \}$ and $P(t_j=t|s_j^*) \in \{ 0, 1 \} $, we obtain the final result:
+\begin{align}
+  &s_k^* = \argmax_{s_k} \sum_t P(t|\vec{q}) \, P(t_k = t | s_k) \sum_{j=1}^{k-1} P(t_j=t|s_j^*) \nonumber \\
+  & \hspace{16mm} - \sum_t P(t|\vec{q}) \, P(t_k = t | s_k) \sum_{j=1}^{k-1} P(t_j=t|s_j^*) \max_{\substack{ i \in [1, k-1] \\ i \neq j}} P(t_i=t|s_i^*) \nonumber
+\end{align}
+
+We remark that this is of the same form as~\eqref{eq.ncall.alt2} in
+Section~\ref{subsec:ncall} when $n=2$, albeit derived in a much
+simpler fashion under this more restrictive case.  The derivation for
+2-call@$k$ from this point proceeds identically to that already
+provided following~\eqref{eq.ncall.alt2}.

@@ -1,0 +1,76 @@
+One of the basic tenets of set-based information retrieval is to
+minimize redundancy, hence maximize diversity, in the result set to
+increase the chance that the results will contain items relevant to
+the user's query~\cite{goffman64OnRelevanceAsAMeasure}.  Hence, \emph{diverse retrieval}
+can be defined as a \emph{set-level} retrieval objective that takes
+into account inter-document relevance dependences when producing a
+result set relevant to a query.
+
+\emph{Subtopic retrieval} --- ``the task of finding documents that
+cover as many \emph{different} subtopics of a general topic as
+possible''~\cite{zhai03Beyond} --- has often been noted as a
+motivating case for diverse retrieval.  That is, if a query has
+multiple facets that should be covered by a result set, or a query has
+multiple ambiguous interpretations, then a retrieval algorithm should
+try to ``cover'' all of these subtopics in its result set.  
+
+If one wants to optimize a result set to cover all possible query
+subtopics, the question naturally arises as to what set-level
+relevance objective should be optimized?  Wang and
+Zhu~\cite{wangzhu10} have shown that natural forms of diversification
+arise via the optimization of \emph{average precision}~\cite{ap} and
+\emph{reciprocal rank}~\cite{mrr}.  While these results directly
+motivate diverse retrieval via \emph{rank-based} (ordered set)
+relevance criteria, they do not use the subtopic motivation for
+diversity.  We use this alternate subtopic motivation in this article,
+where we define binary relevance via a \emph{latent subtopic model}
+(shown in Figure~\ref{fig:gm} and 
+formally defined in Section~\ref{sec:model}).  With this
+definition of relevance, we then optimize the expectation of
+the \emph{$n$-call@$k$} \emph{set-based} relevance criteria that takes
+the value 1 if at least $n$ of $k$ documents in a result set are
+relevant and 0 otherwise~\cite{chen06Less}.
+
+Mathematically, it turns out that the optimization of expected
+$n$-call@$k$ encourages more diversity as $n \to 1$, which reflects
+previous empirical observations in the literature
+~\cite{wang09PortfolioTheory} (Figure 2c).  However, it turns out
+there are also deep connections between this derivation and one of the
+most popular diversification algorithms in the literature known as
+maximal marginal relevance (MMR)~\cite{carbonell98MMR}.
+
+Formally, MMR takes an \emph{item set} $D$ (e.g., a set of documents) where retrieved items
+are denoted as $s_i \in D$, and aims to select an optimal subset of
+items $S_k^* \subset D$ (where $|S_k^*| = k$ and $k < |D|$)
+\emph{relevant} to a given query $\vec{q}$ (e.g., query terms) with
+some level of \emph{diversity} among the items in $S_k^*$.  MMR
+builds $S_k^*$ in a greedy manner by choosing the next optimal
+selection $s_k^*$ given the set of $k-1$ optimal selections
+$S_{k-1}^* = \{ s_1^*, \ldots, s_{k-1}^* \}$ (recursively defining
+$S_k^* = S_{k-1}^* \cup \{ s_k^* \}$ with $S_0^* = \emptyset$)
+as follows:
+%MMR chooses $s_k^*$
+%greedily according to the following criteria:
+\begin{equation}\label{eq:MMR}
+ s_k^* = \hspace{-.3mm} \argmax_{s_k \in D \setminus S_{k-1}^*} [ \lambda(\Sim_{1}(\vec{q},s_k))\hspace{-.3mm}-\hspace{-.3mm}(1-\lambda)\max_{s_i \in S_{k-1}^*} \Sim_{2}(s_i,s_k) ].
+\end{equation}
+Here, 
+$\lambda \in [0, 1]$, metric $\Sim_{1}$ measures
+query-item relevance, and metric $\Sim_{2}$ measures the similarity
+between two items. In the case of $s_1^*$, the $\max$ term is omitted.
+
+In MMR, we note that the $\lambda$ term explicitly controls the
+trade-off between relevance and diversity. This $\lambda$ term has
+been traditionally set in an ad-hoc manner or in recent work, learned
+in a query-specific way from data~\cite{santos2010selectively}.  The
+derivation presented in this article formally demonstrates that greedy
+optimization of expected $n$-call@$k$ precisely corresponds to $\lambda
+= \frac{n}{n+1}$ in MMR.  In addition, we also note deep mathematical
+connections between the optimization of $n$-call@$k$ and a variety of
+other (often ad-hoc) diversification approaches proposed in the
+literature.
+
+This article extends our previous works \cite{plmmr}, \cite{sanner11},
+and~\cite{LimKarWai:SIGIR2012}.
+
+

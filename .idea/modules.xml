@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/analyzer/analyzer.iml" filepath="$PROJECT_DIR$/analyzer/analyzer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/data/data.iml" filepath="$PROJECT_DIR$/data/data.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dbmanager/dbmanager.iml" filepath="$PROJECT_DIR$/dbmanager/dbmanager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/data/diversify.iml" filepath="$PROJECT_DIR$/data/diversify.iml" />
+      <module fileurl="file://$PROJECT_DIR$/diversify2.iml" filepath="$PROJECT_DIR$/diversify2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/environment/environment.iml" filepath="$PROJECT_DIR$/environment/environment.iml" />
+      <module fileurl="file://$PROJECT_DIR$/evaluator/evaluator.iml" filepath="$PROJECT_DIR$/evaluator/evaluator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/graphbuilder/graphbuilder.iml" filepath="$PROJECT_DIR$/graphbuilder/graphbuilder.iml" />
+      <module fileurl="file://$PROJECT_DIR$/graphminer.iml" filepath="$PROJECT_DIR$/graphminer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/summarizer/summarizer.iml" filepath="$PROJECT_DIR$/summarizer/summarizer.iml" />
+    </modules>
+  </component>
+</project>
