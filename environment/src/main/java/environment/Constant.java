@@ -18,7 +18,7 @@ public class Constant {
 	*/
 	public static final String JSON_FILE_NAME_FORMAT = "%s_%d.json";
 	public static final int START_PATH_DEPTH = 2;
-	public static final long MAX_PATHS = 100000000;
+	public static final long MAX_PATHS = 1000000;
 	public static final int MAX_PATH_DEPTH = 8;
-	public static final double RANDON_WALK_PROB_CUTOFF = 0.0000000000001;
+	public static final double RANDON_WALK_PROB_CUTOFF = 0.0000000001;
 }
