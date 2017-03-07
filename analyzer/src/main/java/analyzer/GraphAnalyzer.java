@@ -124,6 +124,7 @@ public class GraphAnalyzer {
 							Iterator<Node> nodes = path.nodes().iterator();
 							while(nodes.hasNext())
 							{
+								// Store the level of the node
 								Node pathNode = nodes.next();
 								if(pathNode.hasLabel(Label.label("keyword")))
 								{
@@ -131,6 +132,8 @@ public class GraphAnalyzer {
 									double currentKeywordScore = keywordIdToScoreMap.getOrDefault(keywordId, 0.0);
 									keywordIdToScoreMap.put(keywordId, currentKeywordScore + pathRWProbability);
 								}
+								
+								// TO-DO: Use the formula for the score calculations.
 							}
 							
 							numberOfPathTraversed++;
