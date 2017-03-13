@@ -36,7 +36,7 @@ public class Main {
 		// Send the input to analyzer for analysis
 		Iterator<Entry<String, Integer>> inputIterator = evaluationInput.getIterator();
 		threadCount = 0;
-		int maxThreadCount = 4;
+		int maxThreadCount = 16;
 		GraphAnalyzer.intialize();
 
 		while(inputIterator.hasNext())
