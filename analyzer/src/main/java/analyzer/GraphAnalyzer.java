@@ -75,7 +75,7 @@ public class GraphAnalyzer {
 				int procArticleId = (int)(long) procPaperNode.getProperty("article_id"); 
 				System.out.println("Running for Proceeding article_id" + procArticleId);
 				long cutOffDate = (long)procPaperNode.getProperty("publication_date");
-				
+
 				ProceeedingPaperSubResult procPaperSubResult = new ProceeedingPaperSubResult(procArticleId);
 
 				double procPaperScore = 0;
@@ -90,20 +90,20 @@ public class GraphAnalyzer {
 					Map<Integer, Double> keywordIdToScoreMap = new HashMap<Integer, Double>();
 					do
 					{
-//						System.out.println("Current Path Length: " + currentDepth);
-//						System.out.println("Current Path Count: " + numberOfPathTraversed);
-						
+						//						System.out.println("Current Path Length: " + currentDepth);
+						//						System.out.println("Current Path Count: " + numberOfPathTraversed);
+
 						//long testCutOffDate = Long.MIN_VALUE;
 						PathExpander<Object> pathExpander = this.createPathExpander(cutOffDate, authorPaperNode.getId(), procPaperNode.getId());
-						
+
 						PathFinder<Path> allPathFinder = GraphAlgoFactory.pathsWithLength(pathExpander, currentDepth);
 						Iterator<Path> allPaths = allPathFinder.findAllPaths(authorPaperNode, procPaperNode).iterator();
-						
+
 						while(allPaths.hasNext())
 						{
 							Path path = allPaths.next();
-//							System.out.println("Processing Path: " + path.toString());
-//							System.out.println("Path Length: " + path.length());
+							//							System.out.println("Processing Path: " + path.toString());
+							//							System.out.println("Path Length: " + path.length());
 							double pathRWProbability = 1.0;
 							Iterator<Relationship> connections  = path.relationships().iterator();
 
@@ -112,13 +112,15 @@ public class GraphAnalyzer {
 								Relationship connection = connections.next();
 								double weight = weightCalculator.getWeightForRelation(connection);
 								pathRWProbability = pathRWProbability * weight;
+								connection = null;
 							}
-							
+							connections = null;
+
 							if(pathRWProbability < Constant.RANDON_WALK_PROB_CUTOFF){ 
-//								System.out.println("Terminated with: " + pathRWProbability); 
+								//								System.out.println("Terminated with: " + pathRWProbability); 
 								continue;	
-								}
-							
+							}
+
 							authorPaperScore += pathRWProbability/path.length();
 
 							Iterator<Node> nodes = path.nodes().iterator();
@@ -132,17 +134,32 @@ public class GraphAnalyzer {
 									double currentKeywordScore = keywordIdToScoreMap.getOrDefault(keywordId, 0.0);
 									keywordIdToScoreMap.put(keywordId, currentKeywordScore + pathRWProbability);
 								}
-								
-								// TO-DO: Use the formula for the score calculations.
+								pathNode = null;						
+								//								// TO-DO: Use the formula for the score calculations.
 							}
-							
+							nodes = null;
+							path = null;
 							numberOfPathTraversed++;
 							if(numberOfPathTraversed > Constant.MAX_PATHS){break;}
 						}
-						
+						allPaths = null;
+
 						if(numberOfPathTraversed < Constant.MAX_PATHS){currentDepth++;}
 						
+						pathExpander = null;
+						allPathFinder = null;
+						
 					}while(numberOfPathTraversed < Constant.MAX_PATHS && currentDepth < Constant.MAX_PATH_DEPTH);
+					
+//					System.out.println("Free Memory: " + Runtime.getRuntime().freeMemory());
+//					System.out.println("Total Memory: " + Runtime.getRuntime().totalMemory());
+					double memRatio = (Runtime.getRuntime().freeMemory() *1.00) / Runtime.getRuntime().totalMemory();
+//					System.out.println("MemRatio: " + memRatio);
+					if(memRatio < 0.25)
+					{
+						Runtime.getRuntime().gc();
+//						System.out.println("GC-RAN");
+					}
 
 					// Create AuthorPaperSubResult
 					int authorArticleId = (int) (long) authorPaperNode.getProperty("article_id"); 
