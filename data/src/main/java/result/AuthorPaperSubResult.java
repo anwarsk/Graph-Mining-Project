@@ -29,6 +29,11 @@ public class AuthorPaperSubResult implements Comparable<AuthorPaperSubResult> {
 		}
 
 	}
+	
+	public void addKeyword(KeywordSubResult keywordSubResult)
+	{
+		this.keywords.add(keywordSubResult);
+	}
 
 	public int getAuthorArticleId() {
 		return authorArticleId;
