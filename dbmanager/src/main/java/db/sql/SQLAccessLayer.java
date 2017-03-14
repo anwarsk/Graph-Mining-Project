@@ -804,6 +804,66 @@ public class SQLAccessLayer {
 
 	}
 
+	public List<Integer> getCitedPapers(String authorId, int proceedingId) {
+		String DB_URL = "localhost";
+		String USERNAME = "root";
+		String PASSWORD = "root";
+
+		MysqlDataSource dataSource = new MysqlDataSource();
+		dataSource.setUser(USERNAME);
+		dataSource.setPassword(PASSWORD);
+		dataSource.setServerName(DB_URL);
+
+		List<Integer> citedPapers = new ArrayList<Integer>();
+		
+		String query = "select ref_obj_id  from acm2015.evaluation_data_unq where author_id='%s' and proc_id='%s';";
+		query = String.format(query, authorId, proceedingId);
+		System.out.println("Executing query:" + query);
+		Connection conn = null;
+		Statement stmt = null;
+		try{
+			//STEP 3: Open a connection
+			conn = dataSource.getConnection();
+
+			//STEP 4: Execute a query
+			stmt = conn.createStatement();
+			String sql;
+			sql = query;
+			ResultSet rs = stmt.executeQuery(sql);
+
+			//STEP 5: Extract data from result set
+			while(rs.next()){
+				//Retrieve by column name
+				int articleId = rs.getInt("ref_obj_id");
+				citedPapers.add(articleId);
+			}
+			//STEP 6: Clean-up environment
+			rs.close();
+			stmt.close();
+			conn.close();
+		}catch(SQLException se){
+			//Handle errors for JDBC
+			se.printStackTrace();
+		}catch(Exception e){
+			//Handle errors for Class.forName
+			e.printStackTrace();
+		}finally{
+			//finally block used to close resources
+			try{
+				if(stmt!=null)
+					stmt.close();
+			}catch(SQLException se2){
+			}// nothing we can do
+			try{
+				if(conn!=null)
+					conn.close();
+			}catch(SQLException se){
+				se.printStackTrace();
+			}//end finally try
+		}//end try
+		return citedPapers;
+	}
+
 
 
 }
