@@ -12,6 +12,10 @@ public class Result {
 	
 	MinMaxPriorityQueue<ProceeedingPaperSubResult> procPaperSubResults;
 
+	public MinMaxPriorityQueue<ProceeedingPaperSubResult> getProceedingPaperSubResults() {
+		return procPaperSubResults;
+	}
+
 	public Result(String authorId, int proceedingId) {
 		
 		this.authorId = authorId;
