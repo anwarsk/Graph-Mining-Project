@@ -55,32 +55,41 @@ public class GraphAnalyzer {
 		try (Transaction tx=dbService.beginTx()) 
 		{
 
+			
+			// (1) - Find the node in the graph for the author 
 			Node author = dbService.findNode(Label.label("author"), "author_id", authorId);
 			if(author == null){ System.out.println("Can not find author with id-" + authorId); return null;}
 
+			// (2) - Find the node for the conference/proceeding in the graph
 			Node proceeding = dbService.findNode(Label.label("proceeding"), "proc_id", proceedingId);
 			if(proceeding == null){ System.out.println("Can not find proceeding with id-" + proceedingId); return null;}
 
-
+			// (3) - Get the iterator over all the papers in the conference or proceeding 
 			Iterator<Relationship> publishedRelations = proceeding.getRelationships(RelationshipType.withName("published_at")).iterator();
-
-
+			
+			// (4) - Initialize weight calculator and Result
 			WeightCalculator weightCalculator = new WeightCalculator();
-
 			result = new Result(authorId, proceedingId);
 
+			// (5) - Iterate over the papers published at the conference
 			while(publishedRelations.hasNext())
 			{
+				// Paper at the conference or proceeding
 				Node procPaperNode = publishedRelations.next().getStartNode();
 				int procArticleId = (int)(long) procPaperNode.getProperty("article_id"); 
+				
 				System.out.println("Running for Proceeding article_id" + procArticleId);
+				
+				// Cut-Of-Date to omit papers published before the proceeding paper
 				long cutOffDate = (long)procPaperNode.getProperty("publication_date");
-
+				
 				ProceeedingPaperSubResult procPaperSubResult = new ProceeedingPaperSubResult(procArticleId);
-
 				double procPaperScore = 0;
 
+				// Get the iterator for the papers written by the author
 				Iterator<Relationship> writtenRelations = author.getRelationships(RelationshipType.withName("written")).iterator();
+				
+				// Iterate over the papers written by the author 
 				while(writtenRelations.hasNext())
 				{
 					double authorPaperScore =  0;
