@@ -50,6 +50,9 @@ public class GraphAnalyzer {
 
 		if(!isInitialized){intialize();}
 
+		/**
+		 * Initialize the result
+		 */
 		Result result =  null;
 
 		try (Transaction tx=dbService.beginTx()) 
@@ -92,82 +95,139 @@ public class GraphAnalyzer {
 				// Iterate over the papers written by the author 
 				while(writtenRelations.hasNext())
 				{
-					double authorPaperScore =  0;
+					// Get the node for paper written by the author
 					Node authorPaperNode = writtenRelations.next().getEndNode();
+					
+					// Initialize the variables 
+					double authorPaperScore =  0;
 					long numberOfPathTraversed = 0;
 					int currentDepth = Constant.START_PATH_DEPTH;
 					Map<Integer, Double> keywordIdToScoreMap = new HashMap<Integer, Double>();
+					
+					/**
+					 *  Traverse the paths between author paper and the conference paper until any terminating (boundary) condition is met. 
+					 *  Which is one of the following-
+					 *  1. Maximum allowed number of paths are traversed
+					 *  2. Maximum allowed depth is reached 
+					 */
 					do
 					{
-						//						System.out.println("Current Path Length: " + currentDepth);
-						//						System.out.println("Current Path Count: " + numberOfPathTraversed);
-
-						//long testCutOffDate = Long.MIN_VALUE;
+						/** TO-TEST::
+						System.out.println("Current Path Length: " + currentDepth);
+						System.out.println("Current Path Count: " + numberOfPathTraversed);
+						long testCutOffDate = Long.MIN_VALUE;
+						*/
+						
+						/**
+						 *  Create a path expander which has source and destination node. 
+						 *  Also, know which nodes to omit cut-of-date. It internally creates NodeFilter object.
+						 */
 						PathExpander<Object> pathExpander = this.createPathExpander(cutOffDate, authorPaperNode.getId(), procPaperNode.getId());
-
+						
+						// Get path finder with above expander finding all the paths at specific depth
 						PathFinder<Path> allPathFinder = GraphAlgoFactory.pathsWithLength(pathExpander, currentDepth);
+						
+						// Get the iterator over all the paths matching the condition
 						Iterator<Path> allPaths = allPathFinder.findAllPaths(authorPaperNode, procPaperNode).iterator();
 
+						// Iterate over the paths
 						while(allPaths.hasNext())
 						{
 							Path path = allPaths.next();
 							//							System.out.println("Processing Path: " + path.toString());
 							//							System.out.println("Path Length: " + path.length());
+							
+							// Initialize the random walk probability for the current path nodes 
 							double pathRWProbability = 1.0;
+							
+							// Get the iterator for all the edges in the current path
 							Iterator<Relationship> connections  = path.relationships().iterator();
 
+							// Iterate over all the edges unless random walk probability becomes insignificant
 							while(connections.hasNext() && (pathRWProbability > Constant.RANDON_WALK_PROB_CUTOFF))
 							{
+								// Get the edge
 								Relationship connection = connections.next();
+								
+								// Get the weight for the edge
 								double weight = weightCalculator.getWeightForRelation(connection);
+								
+								// Multiply the edge weight with path random walk probability 
 								pathRWProbability = pathRWProbability * weight;
+								
+								// Make edge/connection null
 								connection = null;
 							}
 							connections = null;
 
+							// Update the author paper score with the current path random walk probability
+							authorPaperScore += pathRWProbability/path.length();
+							
+							/**
+							 *  If the random walk probability is less than a significant value then ignore iterating over 
+							 *  the keywords and updating score for the keyword. 
+							 */
 							if(pathRWProbability < Constant.RANDON_WALK_PROB_CUTOFF){ 
-								//								System.out.println("Terminated with: " + pathRWProbability); 
+								//System.out.println("Terminated with: " + pathRWProbability); 
 								continue;	
 							}
 
-							authorPaperScore += pathRWProbability/path.length();
-
+							// If the probability is significant then iterate over each node in the path
 							Iterator<Node> nodes = path.nodes().iterator();
 							while(nodes.hasNext())
 							{
 								// Store the level of the node
 								Node pathNode = nodes.next();
+								
+								// Update the score for each keyword in the path
 								if(pathNode.hasLabel(Label.label("keyword")))
 								{
+									// Get the keyword id 
 									int keywordId = (int) pathNode.getProperty("keyword_id");
+									
+									// Get the current keyword score if exists or 0 if does not with default 
 									double currentKeywordScore = keywordIdToScoreMap.getOrDefault(keywordId, 0.0);
+									
+									// Update the keyword score by adding the current random walk probability
 									keywordIdToScoreMap.put(keywordId, currentKeywordScore + pathRWProbability);
 								}
+								
 								pathNode = null;						
-								//								// TO-DO: Use the formula for the score calculations.
+								// TO-DO: Use the formula for the score calculations.
 							}
+							
 							nodes = null;
 							path = null;
+							
+							// Update the number of path traversed between author paper and the conference paper
 							numberOfPathTraversed++;
+							
+							// If maximum number of paths are traversed then break the loop
 							if(numberOfPathTraversed > Constant.MAX_PATHS){break;}
 						}
 						allPaths = null;
 
+						/**
+						 * If we have traversed all the path at current depth n. And it still falls short to the maximum path 
+						 * allowed between author paper and the conference paper. Increase the depth by 1 i.e. new depth n+1.
+						 */
 						if(numberOfPathTraversed < Constant.MAX_PATHS){currentDepth++;}
 						
+						// Reset the path expander and finder 
 						pathExpander = null;
 						allPathFinder = null;
 						
 					}while(numberOfPathTraversed < Constant.MAX_PATHS && currentDepth < Constant.MAX_PATH_DEPTH);
 					
-//					System.out.println("Free Memory: " + Runtime.getRuntime().freeMemory());
-//					System.out.println("Total Memory: " + Runtime.getRuntime().totalMemory());
+					/**
+					 *  Call the garbage collector in case after processing current pair of author paper and conference paper
+					 *  we have free memory less than 25%. In order to avoid hanging up the system.   
+					 */
 					double memRatio = (Runtime.getRuntime().freeMemory() *1.00) / Runtime.getRuntime().totalMemory();
-//					System.out.println("MemRatio: " + memRatio);
 					if(memRatio < 0.25)
 					{
 						Runtime.getRuntime().gc();
-//						System.out.println("GC-RAN");
+						//System.out.println("GC-RAN");
 					}
 
 					// Create AuthorPaperSubResult
@@ -183,6 +243,7 @@ public class GraphAnalyzer {
 				result.addProceedingPaperSubResult(procPaperSubResult);
 			}
 
+			// Close the transaction for neo4j database
 			tx.success();
 			tx.close();
 		}
