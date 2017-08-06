@@ -17,7 +17,7 @@ public class Main {
 		try
 		{
 			CSVAccessLayer csvAccessLayer = new CSVAccessLayer();
-			EvaluationInput evaluationInput = csvAccessLayer.readEvaluationInput(Constant.EVALUATION_INPUT_FILE);
+			EvaluationInput evaluationInput = csvAccessLayer.readEvaluationInput(Constant.EVALUATION_TRUTH_FILE);
 			System.out.println("INPUT SIZE: " + evaluationInput.size());
 
 			JSONAccessLayer jsonAccessLayer = new JSONAccessLayer();
