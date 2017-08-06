@@ -31,12 +31,14 @@ public class GraphAnalyzer {
 
 	private static File databaseDirectory;
 	private static GraphDatabaseService dbService;
+
 	private static boolean isInitialized = false; 
 
 	public static void intialize()
 	{
 		if(!isInitialized)
 		{
+			
 			databaseDirectory = new File(NEO_GRAPH_DB_PATH);
 			dbService =  new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
 			isInitialized = true;
