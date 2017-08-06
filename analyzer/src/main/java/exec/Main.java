@@ -18,7 +18,7 @@ import result.Result;
 public class Main {
 
 	//private static final String INPUT_FILE_PATH = "D:\\Work\\Database\\CSV\\evaluation_aid_proc_id_gt_5.csv";
-	private static final String INPUT_FILE_PATH = Constant.EVALUATION_INPUT_FILE;
+	private static final String INPUT_FILE_PATH = Constant.EVALUATION_TRUTH_FILE;
 	public static Queue<Result> resultQueue;
 	public static int threadCount;
 	public static void main(String[] args) {
@@ -36,7 +36,7 @@ public class Main {
 		// Send the input to analyzer for analysis
 		Iterator<Entry<String, Integer>> inputIterator = evaluationInput.getIterator();
 		threadCount = 0;
-		int maxThreadCount = 16;
+		int maxThreadCount = 4;
 		GraphAnalyzer.intialize();
 
 		while(inputIterator.hasNext())
