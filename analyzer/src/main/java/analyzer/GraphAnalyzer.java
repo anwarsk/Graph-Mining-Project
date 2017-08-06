@@ -134,8 +134,8 @@ public class GraphAnalyzer {
 						while(allPaths.hasNext())
 						{
 							Path path = allPaths.next();
-							//							System.out.println("Processing Path: " + path.toString());
-							//							System.out.println("Path Length: " + path.length());
+							// System.out.println("Processing Path: " + path.toString());
+							// System.out.println("Path Length: " + path.length());
 							
 							// Initialize the random walk probability for the current path nodes 
 							double pathRWProbability = 1.0;
