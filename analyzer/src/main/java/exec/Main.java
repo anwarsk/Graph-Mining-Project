@@ -21,6 +21,8 @@ public class Main {
 	private static final String INPUT_FILE_PATH = Constant.EVALUATION_TRUTH_FILE;
 	public static Queue<Result> resultQueue;
 	public static int threadCount;
+	
+	
 	public static void main(String[] args) {
 
 		// Read the evaluation file
