@@ -107,8 +107,8 @@ public class GraphAnalyzer {
 					Map<Integer, Double> keywordIdToScoreMap = new HashMap<Integer, Double>();
 					
 					/**
-					 *  Traverse the paths between author paper and the conference paper until any terminating (boundary) condition is met. 
-					 *  Which is one of the following-
+					 *  Traverse the paths between author paper and the conference paper until any terminating (boundary) 
+					 *  condition is met. Which is one of the following-
 					 *  1. Maximum allowed number of paths are traversed
 					 *  2. Maximum allowed depth is reached 
 					 */
@@ -145,7 +145,10 @@ public class GraphAnalyzer {
 							// Get the iterator for all the edges in the current path
 							Iterator<Relationship> connections  = path.relationships().iterator();
 
-							// Iterate over all the edges unless random walk probability becomes insignificant
+							/**
+							 * Iterate over all the edges in the current iterating path. 
+							 * Unless random walk probability becomes insignificant
+							 */		
 							while(connections.hasNext() && (pathRWProbability > Constant.RANDON_WALK_PROB_CUTOFF))
 							{
 								// Get the edge
@@ -191,7 +194,7 @@ public class GraphAnalyzer {
 									double currentKeywordScore = keywordIdToScoreMap.getOrDefault(keywordId, 0.0);
 									
 									// Update the keyword score by adding the current random walk probability
-									keywordIdToScoreMap.put(keywordId, currentKeywordScore + pathRWProbability);
+									keywordIdToScoreMap.put(keywordId, currentKeywordScore + pathRWProbability/path.length());
 								}
 								
 								pathNode = null;						
@@ -222,7 +225,7 @@ public class GraphAnalyzer {
 					}while(numberOfPathTraversed < Constant.MAX_PATHS && currentDepth < Constant.MAX_PATH_DEPTH);
 					
 					/**
-					 *  Call the garbage collector in case after processing current pair of author paper and conference paper
+					 *  Call garbage collector in case after processing current pair of author paper and conference paper
 					 *  we have free memory less than 25%. In order to avoid hanging up the system.   
 					 */
 					double memRatio = (Runtime.getRuntime().freeMemory() *1.00) / Runtime.getRuntime().totalMemory();
