@@ -18,9 +18,29 @@ public class Constant {
 	//*/
 	
 	public static final String JSON_FILE_NAME_FORMAT = "%s_%d.json";
+	
+	// This is depth at which analyzer start looking for path between author paper and conference paper
 	public static final int START_PATH_DEPTH = 2;
-	public static final long MAX_PATHS = 1000000;
-	public static final int MAX_PATH_DEPTH = 8;
-	public static final double RANDON_WALK_PROB_CUTOFF = 1e-80;
+	
+	// This is max number of paths analyzer finds between target and source
+	public static final long MAX_PATHS = 100;
+	
+	// This is max depth until which analyzer look for path between author paper and conference paper
+	public static final int MAX_PATH_DEPTH = 4;
+	
+	public static final double RANDON_WALK_PROB_CUTOFF = 1e-8;
+	
+	// Evaluation result output file
 	public static final String EVALUATION_RESULT_FILE = "/Users/anwar/GraphMiner/ouput/result/FinalResult.csv";
+	
+	/**
+	 * Following constants defines the structure of Evaluation Input file.
+	 * Columns depicting different values
+	 */
+	
+	public static final int GROUND_TRUTH_AUTHOR_ID_COLUMN_INDEX = 0;
+	public static final int GROUND_TRUTH_PROCEEDING_ID_COLUMN_INDEX = 3;
+	//public static final int GROUND_TRUTH_AUTHOR_ID_COLUMN_INDEX = 0;
+	//public static final int GROUND_TRUTH_AUTHOR_ID_COLUMN_INDEX = 0;
+	
 }
