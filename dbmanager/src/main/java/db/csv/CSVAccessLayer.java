@@ -12,6 +12,7 @@ import data.Author;
 import data.EvaluationInput;
 import data.Keyword;
 import data.Paper;
+import environment.Constant;
 
 public class CSVAccessLayer {
 
@@ -102,15 +103,23 @@ public class CSVAccessLayer {
 		try (BufferedReader buffReader = new BufferedReader(new FileReader(inputFilePath))) 
 		{
 			buffReader.readLine();
+			
+			int testDataLimit = 5;
 
-			while ((line = buffReader.readLine()) != null) {
+			while ((line = buffReader.readLine()) != null && testDataLimit > 0) {
 
 				// use comma as separator
 				String[] data = line.split(",");
-
-				evaluationInput.addEntry(data[0], Integer.parseInt(data[1]));
 				
+				String authorId = data[Constant.GROUND_TRUTH_AUTHOR_ID_COLUMN_INDEX];
+				int proceedingId = Integer.parseInt(data[Constant.GROUND_TRUTH_PROCEEDING_ID_COLUMN_INDEX]);
+				
+				evaluationInput.addEntry(authorId, proceedingId);
+				
+				testDataLimit--;
 			}
+			
+
 
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
