@@ -19,7 +19,20 @@ public class WeightCalculator {
 		assert relation != null : "Null Relation";
 		
 		double weight = 1;
-		weight = (Double) relation.getProperty("b_weight");
+		/**
+		 * Relations has 2-kinds of weights. Forward weight and backward weight.
+		 * Which is calculated as -
+		 * f_weight = 1 / (Total Number of OUTGOING relations of that type)
+		 * b_weight = 1 / (Total Number of INCOMING relations of that type)
+		 */
+		if(relation.hasProperty("b_weight"))
+		{
+			weight = (Double) relation.getProperty("b_weight");
+		}
+		else
+		{
+			weight = (Double) relation.getProperty("f_weight");
+		}
 		
 //		if(relation.getType().name().compareToIgnoreCase("cite") == 0)
 //		{
