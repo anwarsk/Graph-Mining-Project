@@ -9,7 +9,11 @@ import org.apache.commons.collections4.map.MultiValueMap;
 
 public class EvaluationInput {
 
-private MultiValueMap<String, Integer> authorIdToProcIdMap;
+	/**
+	 * TO-DO: MultiValueMap class is deprecated in future versions. Need to change it to
+	 * MultiValuedMap which is a interface and implemented by some concrete classes.
+	 */
+	private MultiValueMap<String, Integer> authorIdToProcIdMap;
 	
 	public EvaluationInput()
 	{
@@ -29,6 +33,7 @@ private MultiValueMap<String, Integer> authorIdToProcIdMap;
 	public void addEntry(String authorId, Integer proceedingId)
 	{
 		this.authorIdToProcIdMap.put(authorId, proceedingId);
+		
 	}
 
 	public int size() {
