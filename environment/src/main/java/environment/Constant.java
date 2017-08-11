@@ -39,8 +39,10 @@ public class Constant {
 	 */
 	
 	public static final int GROUND_TRUTH_AUTHOR_ID_COLUMN_INDEX = 0;
+	public static final int GROUND_TRUTH_AUTHOR_ARTICLE_ID_COLUMN_INDEX = 1;
+	public static final int GROUND_TRUTH_PROC_ARTICLE_ID_COLUMN_INDEX = 2;
 	public static final int GROUND_TRUTH_PROCEEDING_ID_COLUMN_INDEX = 3;
-	//public static final int GROUND_TRUTH_AUTHOR_ID_COLUMN_INDEX = 0;
-	//public static final int GROUND_TRUTH_AUTHOR_ID_COLUMN_INDEX = 0;
+
+	
 	
 }
