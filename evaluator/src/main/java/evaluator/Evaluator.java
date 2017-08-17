@@ -17,6 +17,13 @@ import db.sql.SQLAccessLayer;
 import result.ProceeedingPaperSubResult;
 import result.Result;
 
+/**
+ * This class is responsible for generating evaluation results.
+ * Which is counting true positive values for each proceeding and author pair for k-values.
+ * 
+ * @author anwar
+ *
+ */
 public class Evaluator {
 
 	private static Map<Integer, Integer> globalTruePositive;
