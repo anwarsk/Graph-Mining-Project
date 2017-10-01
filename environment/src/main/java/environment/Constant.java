@@ -33,6 +33,9 @@ public class Constant {
 	// Evaluation result output file
 	public static final String EVALUATION_RESULT_FILE = "/Users/anwar/GraphMiner/ouput/result/FinalResult.csv";
 	
+	// Maximum number of shortest path to retrieve (used in feature generator)
+	public static final int SHORTEST_PATH_COUNT = 1;
+	
 	/**
 	 * Following constants defines the structure of Evaluation Input file.
 	 * Columns depicting different values
