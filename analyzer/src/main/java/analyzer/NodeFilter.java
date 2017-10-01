@@ -22,6 +22,12 @@ public class NodeFilter implements Predicate<Node>{
 	@Override
 	public boolean test(Node testNode) {
 		// TODO Auto-generated method stub
+		/**
+		 * Only those paper Nodes are accepted that are
+		 * published earlier than the cuttoffDate
+		 *  -OR- 
+		 * the target paper
+		 */
 		boolean isNodeMatch = false;
 
 		if(testNode.hasLabel(Label.label("paper"))) 
