@@ -15,6 +15,8 @@ public class Constant {
 	public static final String JSON_OUTPUT_DIRECTORY = "/Users/anwar/GraphMiner/ouput/json";	
 	public static final String EVALUATION_TRUTH_FILE = "/Users/anwar/GraphMiner/data/evaluation_data_unique1.csv";
 	public static final String EVALUATION_OUTPUT_FILE = "/Users/anwar/GraphMiner/ouput/result/results.csv";
+	
+	public static final String FEATURE_GENERATOR_INPUT_FILE = "";
 	//*/
 	
 	public static final String JSON_FILE_NAME_FORMAT = "%s_%d.json";
@@ -47,7 +49,8 @@ public class Constant {
 	public static final int GROUND_TRUTH_PROCEEDING_ID_COLUMN_INDEX = 3;
 	public static final int GROUND_TRUTH__AUTHOR_PROC_COUNT_COLUMN_INDEX = 4;
 
-
+	public static final int FEATURE_GENERATOR_AUTHOR_ID_COLUMN_INDEX = 0;
+	public static final int FEATURE_GENERATOR_PROCEEDING_ID_COLUMN_INDEX = 1;
 	
 	
 }
