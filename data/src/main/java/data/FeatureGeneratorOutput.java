@@ -1,6 +1,8 @@
 package data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class FeatureGeneratorOutput {
 	
@@ -9,7 +11,7 @@ public class FeatureGeneratorOutput {
 	
 	private FeatureGeneratorOutput()
 	{
-		
+		this.featureOutput = new HashMap<String, FeatureEntry>();
 	}
 	
 	public static FeatureGeneratorOutput getInstance()
@@ -53,12 +55,14 @@ public class FeatureGeneratorOutput {
 		FeatureEntry featureEntry = this.getFeatureEntry(authorId, articleId);
 		featureEntry.distance = distance;
 	}
+	
+	public List<FeatureEntry> getListOfFeatureEntry()
+	{
+		List<FeatureEntry> featureEntryList = new ArrayList<FeatureEntry>();
+		featureEntryList.addAll(this.featureOutput.values());
+		
+		return featureEntryList;
+	}
+	
 
-}
-
-class FeatureEntry
-{
-	String authorId;
-	int articleId;
-	int distance;
 }
