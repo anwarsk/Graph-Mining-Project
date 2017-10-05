@@ -16,7 +16,8 @@ public class Constant {
 	public static final String EVALUATION_TRUTH_FILE = "/Users/anwar/GraphMiner/data/evaluation_data_unique1.csv";
 	public static final String EVALUATION_OUTPUT_FILE = "/Users/anwar/GraphMiner/ouput/result/results.csv";
 	
-	public static final String FEATURE_GENERATOR_INPUT_FILE = "";
+	public static final String FEATURE_GENERATOR_INPUT_FILE = "/Users/anwar/java_workspace/Graph-Mining-Project/input/author_proceeding_cite_gt_1.csv";
+	public static final String FEATURE_GENERATOR_OUTPUT_FILE = "/Users/anwar/java_workspace/Graph-Mining-Project/output/featureOutput.csv";
 	//*/
 	
 	public static final String JSON_FILE_NAME_FORMAT = "%s_%d.json";
@@ -28,7 +29,7 @@ public class Constant {
 	public static final long MAX_PATHS = 100;
 	
 	// This is max depth until which analyzer look for path between author paper and conference paper
-	public static final int MAX_PATH_DEPTH = 4;
+	public static final int MAX_PATH_DEPTH = 10;
 	
 	public static final double RANDON_WALK_PROB_CUTOFF = 1e-8;
 	
