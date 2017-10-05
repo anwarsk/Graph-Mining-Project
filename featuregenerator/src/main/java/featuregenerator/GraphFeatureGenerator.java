@@ -1,6 +1,11 @@
 package featuregenerator;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.neo4j.graphalgo.GraphAlgoFactory;
 import org.neo4j.graphalgo.PathFinder;
@@ -9,10 +14,14 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.PathExpander;
-import org.neo4j.graphdb.PathExpanders;
+import org.neo4j.graphdb.PathExpanderBuilder;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
+import data.FeatureGeneratorInput;
+import data.FeatureGeneratorOutput;
 import environment.Constant;
 
 /**
@@ -39,15 +48,55 @@ public class GraphFeatureGenerator {
 		}
 
 	}
-	void generateDistanceFeature()
+
+	public void generateDistanceFeature(FeatureGeneratorInput featureGeneratorInput)
 	{
+		assert featureGeneratorInput != null : "NULL Feature Generator";
+		assert featureGeneratorInput.size() > 0 : "Empty Feature Generator";
+
+		FeatureGeneratorOutput featureGeneratorOutput = FeatureGeneratorOutput.getInstance();
+		Iterator<Entry<String, Integer>> inputIterator = featureGeneratorInput.getIterator();
+
+		while(inputIterator.hasNext())
+		{
+			Entry<String, Integer> input = inputIterator.next();
+			String authorId = input.getKey();
+			int proceedingId = input.getValue();
+
+			// (1) - Find the node in the graph for the author 
+			Node author = dbService.findNode(Label.label("author"), "author_id", authorId);
+			if(author == null){ System.out.println("Can not find author with id-" + authorId); continue;}
+
+			// (2) -  
+			Node proceeding = dbService.findNode(Label.label("proceeding"), "proc_id", proceedingId);
+			if(proceeding == null){ System.out.println("Can not find proceeding with id-" + proceedingId); continue;}
+
+			//(3) - Get the iterator over all the papers in the conference or proceeding 
+			Iterator<Relationship> publishedRelations = proceeding.getRelationships(RelationshipType.withName("published_at")).iterator();
+
+			while(publishedRelations.hasNext())
+			{
+				Relationship publishedRelationShip = publishedRelations.next();
+				if(publishedRelationShip == null){System.out.println("Null published Relationship"); continue;}
+				
+				Node paperNode = publishedRelationShip.getOtherNode(proceeding);
+				if(paperNode == null){System.out.println("Null paper Node from the relationship"); continue;}
+				
+				int articleId = (int) paperNode.getProperty("article_id");
+				int shortestDistance = this.getShortestDistanceBetweenAuthorAndPaper(author, paperNode);
+				
+				featureGeneratorOutput.addDistance(authorId, articleId, shortestDistance);
+			}
+		}
+		
+		// TEST-METHOD TO WRITE OUTPUT
 
 	}
 
-	int getShortestDistanceBetweenAuthorAndPaper(String authorId, int articleId)
+	int getShortestDistanceBetweenAuthorAndPaper(Node author, Node paper)
 	{
-		assert authorId != null && authorId.isEmpty() == false : "Invalid Author Id";
-		assert articleId >0 : "Invalid Article Id";
+		assert author != null : "Null Author node";
+		assert paper != null : "Null Paper node";
 
 		if(!isInitialized){intialize();}
 
@@ -59,29 +108,38 @@ public class GraphFeatureGenerator {
 
 		try (Transaction tx=dbService.beginTx()) 
 		{
-
-			// (1) - Find the node in the graph for the author 
-			Node author = dbService.findNode(Label.label("author"), "author_id", authorId);
-			if(author == null){ System.out.println("Can not find author with id-" + authorId); return distance;}
-
-			// (2) - Find the node for the conference/proceeding in the graph
-			Node paper = dbService.findNode(Label.label("paper"), "article_id", articleId);
-			if(paper == null){ System.out.println("Can not find paper with id-" + articleId); return distance;}
-			
 			// (3) - Get the path finder 
-			PathExpander<Object> pathExpander = PathExpanders.allTypesAndDirections();
-			
+			PathExpander<Object> pathExpander = this.createPathExpanderForPaperAndKeyword();
+
 			// 
 			PathFinder<Path> pathFinder = GraphAlgoFactory.shortestPath(pathExpander, Constant.MAX_PATH_DEPTH, 
 					Constant.SHORTEST_PATH_COUNT);
-			
+
 			distance = pathFinder.findSinglePath(author, paper).length();
-			
+
 			tx.success();
 			tx.close();
 		}
 
 		return distance;
+	}
+
+	private PathExpander<Object> createPathExpanderForPaperAndKeyword()
+	{
+		PathExpander<Object> pathExpander = null;
+
+		PathExpanderBuilder pathExpanderBuilder = PathExpanderBuilder.allTypesAndDirections();
+		pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("published_at"));
+		pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("published_in"));
+		//pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("written"));
+		//pathExpanderBuilder = pathExpanderBuilder.remove(RelationshipType.withName("cite"));
+
+		//NodeFilter nodeFilter = new NodeFilter(cutOffDate, startNodeId, endNodeId);
+		//pathExpanderBuilder = pathExpanderBuilder.addNodeFilter(nodeFilter);
+
+		pathExpander = pathExpanderBuilder.build();
+
+		return pathExpander;
 	}
 
 }
