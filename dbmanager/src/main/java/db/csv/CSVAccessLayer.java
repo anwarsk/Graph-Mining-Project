@@ -10,7 +10,9 @@ import java.util.List;
 
 import data.Author;
 import data.EvaluationInput;
+import data.FeatureEntry;
 import data.FeatureGeneratorInput;
+import data.FeatureGeneratorOutput;
 import data.Keyword;
 import data.Paper;
 import environment.Constant;
@@ -129,7 +131,7 @@ public class CSVAccessLayer {
 		return evaluationInput;
 	}
 	
-	public FeatureGeneratorInput readFeatureGenerationInput(String inputFilePath)
+	public FeatureGeneratorInput readFeatureGeneratorInput(String inputFilePath)
 	{
 		assert inputFilePath != null : "Null input file path";
 		assert inputFilePath != "" : "Empty input file path";
@@ -164,6 +166,34 @@ public class CSVAccessLayer {
 
 
 		return featureGeneratorInput;
+	}
+	
+	public void writeFeatureGeneratorOutput(String outputFilePath, FeatureGeneratorOutput featureGeneratorOutput)
+	{
+		assert outputFilePath != null : "Null output file path";
+		assert outputFilePath != "" : "Empty output file path";
+		assert featureGeneratorOutput != null : "Null featureGeneratorOutput object";
+		
+		PrintWriter fileWriter;
+		try {
+			fileWriter = new PrintWriter(new File(outputFilePath));
+
+			fileWriter.write("AuthorId,ArticleId,Distance\n");
+			for (FeatureEntry featureEntry : featureGeneratorOutput.getListOfFeatureEntry())
+			{
+				String line = featureEntry.authorId + "," + 
+							  featureEntry.articleId + "," + 
+							  featureEntry.distance;
+				fileWriter.println(line);
+			}
+			fileWriter.flush();
+			fileWriter.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		
 	}
 
 
