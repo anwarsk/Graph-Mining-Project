@@ -10,6 +10,7 @@ import java.util.List;
 
 import data.Author;
 import data.EvaluationInput;
+import data.FeatureGeneratorInput;
 import data.Keyword;
 import data.Paper;
 import environment.Constant;
@@ -104,9 +105,7 @@ public class CSVAccessLayer {
 		{
 			buffReader.readLine();
 			
-			int testDataLimit = 5;
-
-			while ((line = buffReader.readLine()) != null && testDataLimit > 0) {
+			while ((line = buffReader.readLine()) != null) {
 
 				// use comma as separator
 				String[] data = line.split(",");
@@ -116,10 +115,7 @@ public class CSVAccessLayer {
 				
 				evaluationInput.addEntry(authorId, proceedingId);
 				
-				testDataLimit--;
 			}
-			
-
 
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -132,5 +128,43 @@ public class CSVAccessLayer {
 
 		return evaluationInput;
 	}
+	
+	public FeatureGeneratorInput readFeatureGenerationInput(String inputFilePath)
+	{
+		assert inputFilePath != null : "Null input file path";
+		assert inputFilePath != "" : "Empty input file path";
+
+		FeatureGeneratorInput featureGeneratorInput = new FeatureGeneratorInput();
+
+		String line = "";
+		
+		try (BufferedReader buffReader = new BufferedReader(new FileReader(inputFilePath))) 
+		{
+			buffReader.readLine();
+			
+			while ((line = buffReader.readLine()) != null) {
+
+				// use comma as separator
+				String[] data = line.split(",");
+				
+				String authorId = data[Constant.FEATURE_GENERATOR_AUTHOR_ID_COLUMN_INDEX];
+				int proceedingId = Integer.parseInt(data[Constant.FEATURE_GENERATOR_PROCEEDING_ID_COLUMN_INDEX]);
+				
+				featureGeneratorInput.addEntry(authorId, proceedingId);
+				
+			}
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+
+		return featureGeneratorInput;
+	}
+
 
 }
