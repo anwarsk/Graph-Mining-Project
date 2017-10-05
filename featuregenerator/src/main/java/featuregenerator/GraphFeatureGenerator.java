@@ -22,6 +22,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import data.FeatureGeneratorInput;
 import data.FeatureGeneratorOutput;
+import db.csv.CSVAccessLayer;
 import environment.Constant;
 
 /**
@@ -49,7 +50,7 @@ public class GraphFeatureGenerator {
 
 	}
 
-	public void generateDistanceFeature(FeatureGeneratorInput featureGeneratorInput)
+	public FeatureGeneratorOutput generateDistanceFeature(FeatureGeneratorInput featureGeneratorInput)
 	{
 		assert featureGeneratorInput != null : "NULL Feature Generator";
 		assert featureGeneratorInput.size() > 0 : "Empty Feature Generator";
@@ -57,40 +58,52 @@ public class GraphFeatureGenerator {
 		FeatureGeneratorOutput featureGeneratorOutput = FeatureGeneratorOutput.getInstance();
 		Iterator<Entry<String, Integer>> inputIterator = featureGeneratorInput.getIterator();
 
-		while(inputIterator.hasNext())
+		if(!isInitialized){intialize();}
+
+		System.out.println("\n Starting to Generate Distance Feature");
+
+		try (Transaction tx=dbService.beginTx()) 
 		{
-			Entry<String, Integer> input = inputIterator.next();
-			String authorId = input.getKey();
-			int proceedingId = input.getValue();
-
-			// (1) - Find the node in the graph for the author 
-			Node author = dbService.findNode(Label.label("author"), "author_id", authorId);
-			if(author == null){ System.out.println("Can not find author with id-" + authorId); continue;}
-
-			// (2) -  
-			Node proceeding = dbService.findNode(Label.label("proceeding"), "proc_id", proceedingId);
-			if(proceeding == null){ System.out.println("Can not find proceeding with id-" + proceedingId); continue;}
-
-			//(3) - Get the iterator over all the papers in the conference or proceeding 
-			Iterator<Relationship> publishedRelations = proceeding.getRelationships(RelationshipType.withName("published_at")).iterator();
-
-			while(publishedRelations.hasNext())
+			while(inputIterator.hasNext())
 			{
-				Relationship publishedRelationShip = publishedRelations.next();
-				if(publishedRelationShip == null){System.out.println("Null published Relationship"); continue;}
-				
-				Node paperNode = publishedRelationShip.getOtherNode(proceeding);
-				if(paperNode == null){System.out.println("Null paper Node from the relationship"); continue;}
-				
-				int articleId = (int) paperNode.getProperty("article_id");
-				int shortestDistance = this.getShortestDistanceBetweenAuthorAndPaper(author, paperNode);
-				
-				featureGeneratorOutput.addDistance(authorId, articleId, shortestDistance);
-			}
-		}
-		
-		// TEST-METHOD TO WRITE OUTPUT
+				Entry<String, Integer> input = inputIterator.next();
+				String authorId = input.getKey();
+				int proceedingId = input.getValue();
 
+				// (1) - Find the node in the graph for the author 
+				Node author = dbService.findNode(Label.label("author"), "author_id", authorId);
+				if(author == null){ System.out.println("Can not find author with id-" + authorId); continue;}
+
+				// (2) -  
+				Node proceeding = dbService.findNode(Label.label("proceeding"), "proc_id", proceedingId);
+				if(proceeding == null){ System.out.println("Can not find proceeding with id-" + proceedingId); continue;}
+
+				//(3) - Get the iterator over all the papers in the conference or proceeding 
+				Iterator<Relationship> publishedRelations = proceeding.getRelationships(RelationshipType.withName("published_at")).iterator();
+
+				while(publishedRelations.hasNext())
+				{
+					Relationship publishedRelationShip = publishedRelations.next();
+					if(publishedRelationShip == null){System.out.println("Null published Relationship"); continue;}
+
+					Node paperNode = publishedRelationShip.getOtherNode(proceeding);
+					if(paperNode == null){System.out.println("Null paper Node from the relationship"); continue;}
+
+					int articleId = (int) (long) paperNode.getProperty("article_id");
+					int shortestDistance = this.getShortestDistanceBetweenAuthorAndPaper(author, paperNode);
+
+					featureGeneratorOutput.addDistance(authorId, articleId, shortestDistance);
+				}
+			}
+
+			tx.success();
+			tx.close();
+		}
+
+
+		System.out.println("\n Completed Generating Distance Feature");
+
+		return featureGeneratorOutput;
 	}
 
 	int getShortestDistanceBetweenAuthorAndPaper(Node author, Node paper)
@@ -106,21 +119,17 @@ public class GraphFeatureGenerator {
 		 */
 		int distance = -1;
 
-		try (Transaction tx=dbService.beginTx()) 
-		{
-			// (3) - Get the path finder 
-			PathExpander<Object> pathExpander = this.createPathExpanderForPaperAndKeyword();
+		// (3) - Get the path finder 
+		PathExpander<Object> pathExpander = this.createPathExpanderForPaperAndKeyword();
 
-			// 
-			PathFinder<Path> pathFinder = GraphAlgoFactory.shortestPath(pathExpander, Constant.MAX_PATH_DEPTH, 
-					Constant.SHORTEST_PATH_COUNT);
+		// 
+		PathFinder<Path> pathFinder = GraphAlgoFactory.shortestPath(pathExpander, 
+																	Constant.MAX_PATH_DEPTH, 
+																	Constant.SHORTEST_PATH_COUNT);
 
-			distance = pathFinder.findSinglePath(author, paper).length();
-
-			tx.success();
-			tx.close();
-		}
-
+		Path path = pathFinder.findSinglePath(author, paper);
+		if( path == null) { System.out.println("Can not find path between a-p"); return -1;}
+		distance = path.length();
 		return distance;
 	}
 
