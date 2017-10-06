@@ -1,14 +1,10 @@
 package featuregenerator;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import org.neo4j.cypher.internal.frontend.v2_3.perty.print.condense;
 import org.neo4j.graphalgo.GraphAlgoFactory;
 import org.neo4j.graphalgo.PathFinder;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -23,9 +19,7 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import analyzer.WeightCalculator;
-import data.FeatureGeneratorInput;
 import data.FeatureGeneratorOutput;
-import db.csv.CSVAccessLayer;
 import environment.Constant;
 
 /**
@@ -41,8 +35,9 @@ public class GraphFeatureGenerator {
 
 	private static boolean isInitialized = false; 
 
-	public static void intialize()
+	public static synchronized void intialize()
 	{
+		
 		if(!isInitialized)
 		{
 
@@ -53,67 +48,52 @@ public class GraphFeatureGenerator {
 
 	}
 
-	public FeatureGeneratorOutput generateGraphFeatures(FeatureGeneratorInput featureGeneratorInput)
+	public void generateGraphFeatures(String authorId, int proceedingId)
 	{
-		assert featureGeneratorInput != null : "NULL Feature Generator";
-		assert featureGeneratorInput.size() > 0 : "Empty Feature Generator";
+		assert authorId != null && authorId.isEmpty() == false : "Invalid Author ID";
+		assert proceedingId > 0 : "Invalid Proceeding Id";
 
 		FeatureGeneratorOutput featureGeneratorOutput = FeatureGeneratorOutput.getInstance();
-		Iterator<Entry<String, Integer>> inputIterator = featureGeneratorInput.getIterator();
-
+		
 		if(!isInitialized){intialize();}
-
-		System.out.println("\n Starting to Generate Distance Feature");
-
+		
 		try (Transaction tx=dbService.beginTx()) 
 		{
-			while(inputIterator.hasNext())
+
+			Node authorNode = dbService.findNode(Label.label("author"), "author_id", authorId);
+			if(authorNode == null){ System.out.println("Can not find author with id-" + authorId); return;}
+
+			// (2) -  
+			Node proceeding = dbService.findNode(Label.label("proceeding"), "proc_id", proceedingId);
+			if(proceeding == null){ System.out.println("Can not find proceeding with id-" + proceedingId); return;}
+
+			//(3) - Get the iterator over all the papers in the conference or proceeding 
+			Iterator<Relationship> publishedRelations = proceeding.getRelationships(RelationshipType.withName("published_at")).iterator();
+
+			while(publishedRelations.hasNext())
 			{
-				Entry<String, Integer> input = inputIterator.next();
-				String authorId = input.getKey();
-				int proceedingId = input.getValue();
+				Relationship publishedRelationShip = publishedRelations.next();
+				if(publishedRelationShip == null){System.out.println("Null published Relationship"); continue;}
 
-				// (1) - Find the node in the graph for the author 
-				Node authorNode = dbService.findNode(Label.label("author"), "author_id", authorId);
-				if(authorNode == null){ System.out.println("Can not find author with id-" + authorId); continue;}
+				Node paperNode = publishedRelationShip.getOtherNode(proceeding);
+				if(paperNode == null){System.out.println("Null paper Node from the relationship"); continue;}
 
-				// (2) -  
-				Node proceeding = dbService.findNode(Label.label("proceeding"), "proc_id", proceedingId);
-				if(proceeding == null){ System.out.println("Can not find proceeding with id-" + proceedingId); continue;}
+				int articleId = (int) (long) paperNode.getProperty("article_id");
 
-				//(3) - Get the iterator over all the papers in the conference or proceeding 
-				Iterator<Relationship> publishedRelations = proceeding.getRelationships(RelationshipType.withName("published_at")).iterator();
+				int shortestDistance = this.getShortestDistanceBetweenAuthorAndPaper(authorNode, paperNode);
+				PathFeatures pathFeatures = this.getPathRelatedFeatures(authorNode, paperNode);
 
-				while(publishedRelations.hasNext())
-				{
-					Relationship publishedRelationShip = publishedRelations.next();
-					if(publishedRelationShip == null){System.out.println("Null published Relationship"); continue;}
-
-					Node paperNode = publishedRelationShip.getOtherNode(proceeding);
-					if(paperNode == null){System.out.println("Null paper Node from the relationship"); continue;}
-
-					int articleId = (int) (long) paperNode.getProperty("article_id");
-
-					int shortestDistance = this.getShortestDistanceBetweenAuthorAndPaper(authorNode, paperNode);
-					PathFeatures pathFeatures = this.getPathRelatedFeatures(authorNode, paperNode);
-
-					//featureGeneratorOutput.addDistance(authorId, articleId, shortestDistance);
-					featureGeneratorOutput.addEntry(authorId, articleId, 
-													shortestDistance, 
-													pathFeatures.randomWalkProbability, 
-													pathFeatures.pathLengthToCountMap, 
-													pathFeatures.currentScoringMethod);
-				}
+				//featureGeneratorOutput.addDistance(authorId, articleId, shortestDistance);
+				featureGeneratorOutput.addEntry(authorId, articleId, 
+						shortestDistance, 
+						pathFeatures.randomWalkProbability, 
+						pathFeatures.pathLengthToCountMap, 
+						pathFeatures.currentScoringMethod);
 			}
-
 			tx.success();
 			tx.close();
 		}
 
-
-		System.out.println("\n Completed Generating Distance Feature");
-
-		return featureGeneratorOutput;
 	}
 
 	int getShortestDistanceBetweenAuthorAndPaper(Node author, Node paper)
@@ -151,7 +131,7 @@ public class GraphFeatureGenerator {
 		if(!isInitialized){intialize();}
 
 		PathFeatures pathFeatures = new PathFeatures();
-		
+
 		double randomWalkProbability = 0;
 		double currentScoringMethod = 0;
 		Map<Integer, Integer> pathLengthToCountMap = new HashMap<Integer, Integer>();
@@ -187,15 +167,15 @@ public class GraphFeatureGenerator {
 			pathLengthToCountMap.put(pathLength, currentPathLengthCount+1);
 
 			currentScoringMethod += (pathRandomWalkProbability/pathLength);
-			
+
 			//System.out.println("\n# RandomWalkProbability = " + randomWalkProbability);
 			//System.out.println("\n* PathLength= " + pathLength + " * CurrentScoringMethod= " + currentScoringMethod);
 		}
-		
+
 		pathFeatures.randomWalkProbability = randomWalkProbability;
 		pathFeatures.pathLengthToCountMap = pathLengthToCountMap;
 		pathFeatures.currentScoringMethod = currentScoringMethod;
-		
+
 		return pathFeatures;
 	}
 
