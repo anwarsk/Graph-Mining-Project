@@ -53,7 +53,7 @@ public class GraphFeatureGenerator {
 
 	}
 
-	public FeatureGeneratorOutput generateDistanceFeature(FeatureGeneratorInput featureGeneratorInput)
+	public FeatureGeneratorOutput generateGraphFeatures(FeatureGeneratorInput featureGeneratorInput)
 	{
 		assert featureGeneratorInput != null : "NULL Feature Generator";
 		assert featureGeneratorInput.size() > 0 : "Empty Feature Generator";
@@ -93,14 +93,16 @@ public class GraphFeatureGenerator {
 					if(paperNode == null){System.out.println("Null paper Node from the relationship"); continue;}
 
 					int articleId = (int) (long) paperNode.getProperty("article_id");
-					
-					int shortestDistance = 0; //this.getShortestDistanceBetweenAuthorAndPaper(authorNode, paperNode);
-					double randomWalkProbability = this.getRandomWalkProbability(authorNode, paperNode);
+
+					int shortestDistance = this.getShortestDistanceBetweenAuthorAndPaper(authorNode, paperNode);
+					PathFeatures pathFeatures = this.getPathRelatedFeatures(authorNode, paperNode);
 
 					//featureGeneratorOutput.addDistance(authorId, articleId, shortestDistance);
-					featureGeneratorOutput.addFeatures(authorId, articleId, 
-													   shortestDistance, randomWalkProbability);
-					
+					featureGeneratorOutput.addEntry(authorId, articleId, 
+													shortestDistance, 
+													pathFeatures.randomWalkProbability, 
+													pathFeatures.pathLengthToCountMap, 
+													pathFeatures.currentScoringMethod);
 				}
 			}
 
@@ -141,17 +143,19 @@ public class GraphFeatureGenerator {
 		return distance;
 	}
 
-	double getRandomWalkProbability(Node author, Node paper)
+	PathFeatures getPathRelatedFeatures(Node author, Node paper)
 	{
 		assert author != null : "Null Author node";
 		assert paper != null : "Null Paper node";
 
 		if(!isInitialized){intialize();}
 
+		PathFeatures pathFeatures = new PathFeatures();
+		
 		double randomWalkProbability = 0;
 		double currentScoringMethod = 0;
 		Map<Integer, Integer> pathLengthToCountMap = new HashMap<Integer, Integer>();
-		
+
 		WeightCalculator weightCalculator = new WeightCalculator();
 
 		// (3) - Get the path finder 
@@ -161,24 +165,38 @@ public class GraphFeatureGenerator {
 		PathFinder<Path> pathFinder = GraphAlgoFactory.allPaths(pathExpander, Constant.MAX_PATH_DEPTH);
 
 		Iterable<Path> allPaths = pathFinder.findAllPaths(author, paper);
-		
+
 		if(allPaths == null || allPaths.iterator().hasNext() == false) {System.out.println("No Path between Author and Paper");}
-		
+
 		for(Path path : allPaths)
 		{
 			double pathRandomWalkProbability = 1;
 			if(path == null) { System.out.println("Null Path");continue;}
-			
+
 			for(Relationship realtionship : path.relationships())
 			{
 				if(realtionship == null) {continue;}
 				pathRandomWalkProbability *= weightCalculator.getWeightForRelation(realtionship);
 			}
-			
+
 			randomWalkProbability += pathRandomWalkProbability;
+
+			int pathLength = path.length();
+
+			int currentPathLengthCount = pathLengthToCountMap.getOrDefault(pathLength, 0);
+			pathLengthToCountMap.put(pathLength, currentPathLengthCount+1);
+
+			currentScoringMethod += (pathRandomWalkProbability/pathLength);
+			
+			//System.out.println("\n# RandomWalkProbability = " + randomWalkProbability);
+			//System.out.println("\n* PathLength= " + pathLength + " * CurrentScoringMethod= " + currentScoringMethod);
 		}
 		
-		return randomWalkProbability;
+		pathFeatures.randomWalkProbability = randomWalkProbability;
+		pathFeatures.pathLengthToCountMap = pathLengthToCountMap;
+		pathFeatures.currentScoringMethod = currentScoringMethod;
+		
+		return pathFeatures;
 	}
 
 	private PathExpander<Object> createPathExpanderForPaperAndKeyword()
@@ -199,4 +217,11 @@ public class GraphFeatureGenerator {
 		return pathExpander;
 	}
 
+}
+
+class PathFeatures
+{
+	double randomWalkProbability = 0;
+	double currentScoringMethod = 0;
+	Map<Integer, Integer> pathLengthToCountMap = null;
 }
