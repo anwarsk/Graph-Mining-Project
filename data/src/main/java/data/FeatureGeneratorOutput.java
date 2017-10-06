@@ -56,6 +56,14 @@ public class FeatureGeneratorOutput {
 		featureEntry.distance = distance;
 	}
 	
+	public void addFeatures(String authorId, int articleId, 
+							int distance, double randomWalkProbability)
+	{
+		FeatureEntry featureEntry = this.getFeatureEntry(authorId, articleId);
+		featureEntry.distance = distance;
+		featureEntry.randomWalkProbability = randomWalkProbability;
+	}
+	
 	public List<FeatureEntry> getListOfFeatureEntry()
 	{
 		List<FeatureEntry> featureEntryList = new ArrayList<FeatureEntry>();
