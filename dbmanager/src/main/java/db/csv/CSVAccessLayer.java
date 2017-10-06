@@ -178,12 +178,13 @@ public class CSVAccessLayer {
 		try {
 			fileWriter = new PrintWriter(new File(outputFilePath));
 
-			fileWriter.write("AuthorId,ArticleId,Distance\n");
+			fileWriter.write("AuthorId,ArticleId,Distance,RandomWalkProbability\n");
 			for (FeatureEntry featureEntry : featureGeneratorOutput.getListOfFeatureEntry())
 			{
 				String line = featureEntry.authorId + "," + 
 							  featureEntry.articleId + "," + 
-							  featureEntry.distance;
+							  featureEntry.distance + "," +
+							  featureEntry.randomWalkProbability;
 				fileWriter.println(line);
 			}
 			fileWriter.flush();
@@ -192,7 +193,6 @@ public class CSVAccessLayer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 		
 	}
 
