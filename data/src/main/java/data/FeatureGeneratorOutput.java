@@ -3,6 +3,7 @@ package data;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FeatureGeneratorOutput {
 	
@@ -56,12 +57,17 @@ public class FeatureGeneratorOutput {
 		featureEntry.distance = distance;
 	}
 	
-	public void addFeatures(String authorId, int articleId, 
-							int distance, double randomWalkProbability)
+	public void addEntry(String authorId, int articleId, 
+							int distance, 
+							double randomWalkProbability,
+							Map<Integer,Integer> pathLengthToCountMap,
+							double currentScoringMethod)
 	{
 		FeatureEntry featureEntry = this.getFeatureEntry(authorId, articleId);
 		featureEntry.distance = distance;
 		featureEntry.randomWalkProbability = randomWalkProbability;
+		featureEntry.pathLengthToCountMap = pathLengthToCountMap;
+		featureEntry.currentScoringMethod = currentScoringMethod;
 	}
 	
 	public List<FeatureEntry> getListOfFeatureEntry()
