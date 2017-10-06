@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
 
 import data.Author;
 import data.EvaluationInput;
@@ -177,14 +178,33 @@ public class CSVAccessLayer {
 		PrintWriter fileWriter;
 		try {
 			fileWriter = new PrintWriter(new File(outputFilePath));
-
-			fileWriter.write("AuthorId,ArticleId,Distance,RandomWalkProbability\n");
+			String pathLengthCountHeader = "";
+			for(int pathLength=1; pathLength <= Constant.MAX_PATH_DEPTH; pathLength++)
+			{
+				pathLengthCountHeader += ",PathLength=" + pathLength;  
+			}
+			
+			fileWriter.write("AuthorId,ArticleId,"
+					+ "ShortestDistance,"
+					+ "RandomWalkProbability,"
+					+ "CurrentScoringMethod"
+					+ pathLengthCountHeader 
+					+ "\n");
 			for (FeatureEntry featureEntry : featureGeneratorOutput.getListOfFeatureEntry())
 			{
+				String pathLengthCountString = "";
+				Map<Integer,Integer> pathLengthToCountMap = featureEntry.pathLengthToCountMap;
+				for(int pathLength=1; pathLength <= Constant.MAX_PATH_DEPTH; pathLength++)
+				{
+					pathLengthCountString += "," + pathLengthToCountMap.getOrDefault(pathLength, 0); 
+				}
+				
 				String line = featureEntry.authorId + "," + 
 							  featureEntry.articleId + "," + 
 							  featureEntry.distance + "," +
-							  featureEntry.randomWalkProbability;
+							  featureEntry.randomWalkProbability + "," +
+							  featureEntry.currentScoringMethod +
+							  pathLengthCountString;
 				fileWriter.println(line);
 			}
 			fileWriter.flush();
