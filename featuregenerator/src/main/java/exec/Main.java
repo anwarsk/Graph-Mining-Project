@@ -17,7 +17,7 @@ public class Main {
 		
 		// (2) - Generate distance features 
 		GraphFeatureGenerator graphFeatureGenerator = new GraphFeatureGenerator();
-		FeatureGeneratorOutput featureGeneratorOutput = graphFeatureGenerator.generateDistanceFeature(featureGeneratorInput);
+		FeatureGeneratorOutput featureGeneratorOutput = graphFeatureGenerator.generateGraphFeatures(featureGeneratorInput);
 		
 		csvAccessLayer.writeFeatureGeneratorOutput(Constant.FEATURE_GENERATOR_OUTPUT_FILE, featureGeneratorOutput);
 	}
