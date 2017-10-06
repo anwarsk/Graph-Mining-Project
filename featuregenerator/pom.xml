@@ -10,7 +10,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.iu.graphminer</groupId>
-			<artifactId>dbmanager</artifactId>
+			<artifactId>analyzer</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
