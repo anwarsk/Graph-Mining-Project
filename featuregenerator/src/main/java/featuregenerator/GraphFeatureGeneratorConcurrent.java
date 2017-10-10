@@ -1,5 +1,7 @@
 package featuregenerator;
 
+import data.FeatureGeneratorOutput;
+import db.csv.CSVAccessLayer;
 import environment.Constant;
 
 public class GraphFeatureGeneratorConcurrent implements Runnable {
@@ -13,11 +15,29 @@ public class GraphFeatureGeneratorConcurrent implements Runnable {
 		this.proceedingId = proceedingId;
 	}
 
-	public void generateGraphFeatures()
+	public FeatureGeneratorOutput generateGraphFeatures()
 	{
 		GraphFeatureGenerator graphFeatureGenerator = new GraphFeatureGenerator();
-		graphFeatureGenerator.generateGraphFeatures(this.authorId, this.proceedingId);
+		FeatureGeneratorOutput featureGeneratorOutput = 
+				graphFeatureGenerator.generateGraphFeatures(this.authorId, this.proceedingId);
+		
+		return featureGeneratorOutput;
 	}
+	
+	private synchronized static void writeFeaturesToFile(FeatureGeneratorOutput featureGeneratorOutput)
+	{
+		CSVAccessLayer csvAccessLayer = new CSVAccessLayer();
+		csvAccessLayer.writeFeatureGeneratorOutput(Constant.FEATURE_GENERATOR_OUTPUT_FILE, featureGeneratorOutput);
+	}
+	
+	private synchronized static void writeAuthorProceedingProcessed(String authorId2, int proceedingId2) {
+		// TODO Auto-generated method stub
+		CSVAccessLayer csvAccessLayer = new CSVAccessLayer();
+		csvAccessLayer.writeFeatureGeneratorProcessLog(Constant.FEATURE_GENERATOR_PROCESS_LOG_FILE, authorId2, proceedingId2);
+
+	}
+
+
 
 	public static boolean isMaxThreadCountReached()
 	{
@@ -62,10 +82,14 @@ public class GraphFeatureGeneratorConcurrent implements Runnable {
 	@Override
 	public void run() {
 		increaseThreadCount();
-		this.generateGraphFeatures();
+		System.out.println("Processing Author-Proceeding" + authorId +"-" +proceedingId);
+		FeatureGeneratorOutput featureGeneratorOutput = this.generateGraphFeatures();
+		writeFeaturesToFile(featureGeneratorOutput);
+		writeAuthorProceedingProcessed(this.authorId, this.proceedingId);
 		decreaseThreadCount();
 	}
 	
+
 	public static synchronized void increaseThreadCount()
 	{
 		currentThreadCount++;
