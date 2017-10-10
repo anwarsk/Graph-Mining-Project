@@ -35,37 +35,38 @@ public class GraphFeatureGenerator {
 
 	private static boolean isInitialized = false; 
 
-	public static synchronized void intialize()
+	public static void intialize()
 	{
-		
+
 		if(!isInitialized)
 		{
-
-			databaseDirectory = new File(Constant.NEO_GRAPH_DB_PATH);
-			dbService =  new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
-			isInitialized = true;
+			if(!isInitialized)
+			{
+				databaseDirectory = new File(Constant.NEO_GRAPH_DB_PATH);
+				dbService =  new GraphDatabaseFactory().newEmbeddedDatabase(databaseDirectory);
+				isInitialized = true;
+			}
 		}
 
 	}
 
-	public void generateGraphFeatures(String authorId, int proceedingId)
+	public FeatureGeneratorOutput generateGraphFeatures(String authorId, int proceedingId)
 	{
 		assert authorId != null && authorId.isEmpty() == false : "Invalid Author ID";
 		assert proceedingId > 0 : "Invalid Proceeding Id";
 
-		FeatureGeneratorOutput featureGeneratorOutput = FeatureGeneratorOutput.getInstance();
-		
-		if(!isInitialized){intialize();}
-		
+		FeatureGeneratorOutput featureGeneratorOutput = new FeatureGeneratorOutput();
+
+		//if(!isInitialized){intialize();}
+
 		try (Transaction tx=dbService.beginTx()) 
 		{
-
 			Node authorNode = dbService.findNode(Label.label("author"), "author_id", authorId);
-			if(authorNode == null){ System.out.println("Can not find author with id-" + authorId); return;}
+			if(authorNode == null){ System.out.println("Can not find author with id-" + authorId); return null;}
 
 			// (2) -  
 			Node proceeding = dbService.findNode(Label.label("proceeding"), "proc_id", proceedingId);
-			if(proceeding == null){ System.out.println("Can not find proceeding with id-" + proceedingId); return;}
+			if(proceeding == null){ System.out.println("Can not find proceeding with id-" + proceedingId); return null;}
 
 			//(3) - Get the iterator over all the papers in the conference or proceeding 
 			Iterator<Relationship> publishedRelations = proceeding.getRelationships(RelationshipType.withName("published_at")).iterator();
@@ -94,6 +95,8 @@ public class GraphFeatureGenerator {
 			tx.close();
 		}
 
+		return featureGeneratorOutput;
+
 	}
 
 	int getShortestDistanceBetweenAuthorAndPaper(Node author, Node paper)
@@ -101,7 +104,7 @@ public class GraphFeatureGenerator {
 		assert author != null : "Null Author node";
 		assert paper != null : "Null Paper node";
 
-		if(!isInitialized){intialize();}
+		//if(!isInitialized){intialize();}
 
 		/**
 		 * Find the shortest distance between author node and paper node 
@@ -128,7 +131,7 @@ public class GraphFeatureGenerator {
 		assert author != null : "Null Author node";
 		assert paper != null : "Null Paper node";
 
-		if(!isInitialized){intialize();}
+		//if(!isInitialized){intialize();}
 
 		PathFeatures pathFeatures = new PathFeatures();
 
@@ -195,6 +198,15 @@ public class GraphFeatureGenerator {
 		pathExpander = pathExpanderBuilder.build();
 
 		return pathExpander;
+	}
+
+	public static void shutDown() {
+		// TODO Auto-generated method stub
+		if(isInitialized)
+		{
+			dbService.shutdown();
+			isInitialized = false;
+		}
 	}
 
 }
