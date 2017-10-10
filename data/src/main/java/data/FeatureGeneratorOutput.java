@@ -8,22 +8,22 @@ import java.util.Map;
 public class FeatureGeneratorOutput {
 	
 	private HashMap<String, FeatureEntry> featureOutput;
-	private static FeatureGeneratorOutput instance  = null;
+	//private static FeatureGeneratorOutput instance  = null;
 	
-	private FeatureGeneratorOutput()
+	public FeatureGeneratorOutput()
 	{
 		this.featureOutput = new HashMap<String, FeatureEntry>();
 	}
 	
-	public static FeatureGeneratorOutput getInstance()
-	{
-		if (instance == null)
-		{
-			instance = new FeatureGeneratorOutput();
-		}
-		
-		return instance;
-	}
+//	public static FeatureGeneratorOutput getInstance()
+//	{
+//		if (instance == null)
+//		{
+//			instance = new FeatureGeneratorOutput();
+//		}
+//		
+//		return instance;
+//	}
 	
 	FeatureEntry getFeatureEntry(String authorId, int articleId)
 	{
