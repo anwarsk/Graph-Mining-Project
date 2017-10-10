@@ -3,9 +3,7 @@ package exec;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import data.EvaluationInput;
 import data.FeatureGeneratorInput;
-import data.FeatureGeneratorOutput;
 import db.csv.CSVAccessLayer;
 import environment.Constant;
 import featuregenerator.GraphFeatureGenerator;
@@ -15,13 +13,19 @@ public class Main {
 
 	public static void main(String[] args) {
 
+		
+		FeatureGeneratorInput featureGeneratorInput = new FeatureGeneratorInput();
+		
 		// (1) - Read the feature generator input
 		CSVAccessLayer csvAccessLayer = new CSVAccessLayer();
-		FeatureGeneratorInput featureGeneratorInput = csvAccessLayer.readFeatureGeneratorInput(Constant.FEATURE_GENERATOR_INPUT_FILE);
-
+		csvAccessLayer.readFeatureGeneratorProcessedLog(Constant.FEATURE_GENERATOR_PROCESS_LOG_FILE, featureGeneratorInput);
+		csvAccessLayer.readFeatureGeneratorInput(Constant.FEATURE_GENERATOR_INPUT_FILE, featureGeneratorInput);
+		
 
 		// (2) - Generate distance features 
 		Iterator<Entry<String, Integer>> inputIterator = featureGeneratorInput.getIterator();
+		GraphFeatureGenerator.intialize();
+		long startTime = System.nanoTime();
 
 		while(inputIterator.hasNext() || GraphFeatureGeneratorConcurrent.isThreadRunning())
 		{
@@ -48,8 +52,11 @@ public class Main {
 			}
 
 		}
-
-		csvAccessLayer.writeFeatureGeneratorOutput(Constant.FEATURE_GENERATOR_OUTPUT_FILE, FeatureGeneratorOutput.getInstance());
+		
+		long endTime = System.nanoTime();
+		GraphFeatureGenerator.shutDown();
+		System.out.println("### Time Elapsed: " + (endTime - startTime));
 	}
+
 
 }
