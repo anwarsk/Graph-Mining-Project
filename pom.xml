@@ -17,5 +17,7 @@
 		<module>evaluator</module>
     <module>fetauregenerator</module>
     <module>featuregenerator</module>
-  </modules>
+    <module>EdgeListConverter</module>
+    <module>converter</module>
+	</modules>
 </project>
