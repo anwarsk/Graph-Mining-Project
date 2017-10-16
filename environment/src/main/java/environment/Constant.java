@@ -3,7 +3,7 @@ package environment;
 public class Constant {
 
 
-	static String SYSTEM = "GCLOUD";
+	static String SYSTEM = "HOME";
 	static String PROJECT_PATH = "null";
 
 	static
@@ -83,6 +83,11 @@ public class Constant {
 
 	public static final int FEATURE_GENERATOR_AUTHOR_ID_COLUMN_INDEX = 0;
 	public static final int FEATURE_GENERATOR_PROCEEDING_ID_COLUMN_INDEX = 1;
+	
+	/** CONVERTER - EDGELIST */
+	public static final String EDGE_LIST_OUTPUT_FILE = PROJECT_DIRECTORY + "/output/graph.edgelist";
+	public static final String EDGE_LIST_MAP_FILE = PROJECT_DIRECTORY + "/output/graph.map";
+	
 
 
 }
