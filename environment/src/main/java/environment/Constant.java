@@ -57,10 +57,10 @@ public class Constant {
 	public static final long MAX_PATHS = 100;
 
 	// This is max depth until which analyzer look for path between author paper and conference paper
-	public static final int MAX_PATH_DEPTH = 6;
+	public static final int MAX_PATH_DEPTH = 4;
 
 	//
-	public static final int MAX_THREAD_COUNT = 10;
+	public static final int MAX_THREAD_COUNT = 6;
 
 	public static final double RANDON_WALK_PROB_CUTOFF = 1e-8;
 
