@@ -151,6 +151,7 @@ public class GraphFeatureGenerator {
 
 		if(allPaths == null || allPaths.iterator().hasNext() == false) {System.out.println("No Path between Author and Paper");}
 
+		int pathCount = 0;
 		for(Path path : allPaths)
 		{
 			double pathRandomWalkProbability = 1;
@@ -160,19 +161,26 @@ public class GraphFeatureGenerator {
 			{
 				if(realtionship == null) {continue;}
 				pathRandomWalkProbability *= weightCalculator.getWeightForRelation(realtionship);
+				if(pathRandomWalkProbability < Constant.RANDON_WALK_PROB_CUTOFF) { break; } ;
 			}
 
-			randomWalkProbability += pathRandomWalkProbability;
+			if(pathRandomWalkProbability >= Constant.RANDON_WALK_PROB_CUTOFF)
+			{
+				randomWalkProbability += pathRandomWalkProbability;
 
-			int pathLength = path.length();
+				int pathLength = path.length();
 
-			int currentPathLengthCount = pathLengthToCountMap.getOrDefault(pathLength, 0);
-			pathLengthToCountMap.put(pathLength, currentPathLengthCount+1);
+				int currentPathLengthCount = pathLengthToCountMap.getOrDefault(pathLength, 0);
+				pathLengthToCountMap.put(pathLength, currentPathLengthCount+1);
 
-			currentScoringMethod += (pathRandomWalkProbability/pathLength);
+				currentScoringMethod += (pathRandomWalkProbability/pathLength);
 
-			//System.out.println("\n# RandomWalkProbability = " + randomWalkProbability);
-			//System.out.println("\n* PathLength= " + pathLength + " * CurrentScoringMethod= " + currentScoringMethod);
+				//System.out.println("\n# RandomWalkProbability = " + randomWalkProbability);
+				//System.out.println("\n* PathLength= " + pathLength + " * CurrentScoringMethod= " + currentScoringMethod);
+
+				pathCount++;
+				if(pathCount > Constant.MAX_PATH_COUNT) {break;}
+			}
 		}
 
 		pathFeatures.randomWalkProbability = randomWalkProbability;
