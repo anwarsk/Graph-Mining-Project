@@ -62,6 +62,7 @@ public class Constant {
 	//
 	public static final int MAX_THREAD_COUNT = 10;
 
+	
 	public static final double RANDON_WALK_PROB_CUTOFF = 1e-6;
 
 	// Evaluation result output file
