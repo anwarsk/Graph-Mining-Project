@@ -97,6 +97,8 @@ public class GraphFeatureGeneratorConcurrent implements Runnable {
 	
 	public static synchronized void decreaseThreadCount()
 	{
+		System.gc ();
+		System.runFinalization ();
 		currentThreadCount--;
 	}
 
