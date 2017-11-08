@@ -3,7 +3,7 @@ package environment;
 public class Constant {
 
 
-	static String SYSTEM = "HOME";
+	static String SYSTEM = "GCLOUD";
 	static String PROJECT_PATH = "null";
 
 	static
@@ -41,10 +41,10 @@ public class Constant {
 
 	public static final String PROJECT_DIRECTORY = PROJECT_PATH;
 
-	public static final String NEO_GRAPH_DB_PATH =  PROJECT_DIRECTORY + "/graphdb/graph.acm2015.complete";
+	public static final String NEO_GRAPH_DB_PATH = PROJECT_DIRECTORY + "/graphdb/graph.acm2015.complete";
 	public static final String FEATURE_GENERATOR_INPUT_FILE = PROJECT_DIRECTORY + "/input/author_proceeding_cite_gt_1.csv";
-	public static final String FEATURE_GENERATOR_OUTPUT_FILE = PROJECT_DIRECTORY + "/output/featureOutput_maxDepth_4.csv";
-	public static final String FEATURE_GENERATOR_PROCESS_LOG_FILE = PROJECT_DIRECTORY + "/output/feature_generator_process.csv";
+	public static final String FEATURE_GENERATOR_OUTPUT_FILE = PROJECT_DIRECTORY + "/output/featureOutput_maxDepth_6.csv";
+	public static final String FEATURE_GENERATOR_PROCESS_LOG_FILE = PROJECT_DIRECTORY + "/output/feature_generator_process_6.csv";
 
 	//*/
 
@@ -57,12 +57,12 @@ public class Constant {
 	public static final long MAX_PATHS = 100;
 
 	// This is max depth until which analyzer look for path between author paper and conference paper
-	public static final int MAX_PATH_DEPTH = 4;
+	public static final int MAX_PATH_DEPTH = 6;
 
 	//
-	public static final int MAX_THREAD_COUNT = 6;
+	public static final int MAX_THREAD_COUNT = 10;
 
-	public static final double RANDON_WALK_PROB_CUTOFF = 1e-8;
+	public static final double RANDON_WALK_PROB_CUTOFF = 1e-6;
 
 	// Evaluation result output file
 	public static final String EVALUATION_RESULT_FILE = "/Users/anwar/GraphMiner/ouput/result/FinalResult.csv";
@@ -87,6 +87,7 @@ public class Constant {
 	/** CONVERTER - EDGELIST */
 	public static final String EDGE_LIST_OUTPUT_FILE = PROJECT_DIRECTORY + "/output/graph.edgelist";
 	public static final String EDGE_LIST_MAP_FILE = PROJECT_DIRECTORY + "/output/graph.map";
+	public static final int MAX_PATH_COUNT = 1000000; // Max path 1M
 	
 
 
