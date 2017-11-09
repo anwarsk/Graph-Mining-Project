@@ -60,7 +60,7 @@ public class Constant {
 	public static final int MAX_PATH_DEPTH = 6;
 
 	//
-	public static final int MAX_THREAD_COUNT = 10;
+	public static final int MAX_THREAD_COUNT = 6;
 
 	
 	public static final double RANDON_WALK_PROB_CUTOFF = 1e-6;
@@ -88,7 +88,7 @@ public class Constant {
 	/** CONVERTER - EDGELIST */
 	public static final String EDGE_LIST_OUTPUT_FILE = PROJECT_DIRECTORY + "/output/graph.edgelist";
 	public static final String EDGE_LIST_MAP_FILE = PROJECT_DIRECTORY + "/output/graph.map";
-	public static final int MAX_PATH_COUNT = 1000000; // Max path 1M
+	public static final int MAX_PATH_COUNT = 100000; // Max path 100K
 	
 
 
